@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables
+.env
+
+# Testing cache
+.pytest_cache/
+
+# IDE
+.vscode/
+
+# OS files
+.DS_Store
+
+# Docker
+*.log
