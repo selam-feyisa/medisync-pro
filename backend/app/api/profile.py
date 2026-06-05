@@ -8,5 +8,8 @@ router = APIRouter(
 @router.get("/me")
 async def get_my_profile():
     return {
-        "message": "Profile endpoint working"
+        "id": 1,
+        "email": "user@example.com",
+        "full_name": "Demo User",
+        "role": "member"
     }
