@@ -1,20 +1,24 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.app.api.auth import router as auth_router
+
 app = FastAPI(
-    title='MediSync Pro',
-    version='1.0.0',
-    description='Healthcare Appointment & Records SaaS'
+    title="MediSync Pro",
+    version="1.0.0",
+    description="Healthcare Appointment and Records SaaS"
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000'],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-@app.get('/health')
+app.include_router(auth_router)
+
+@app.get("/health")
 def health():
-    return {'status': 'ok', 'service': 'medisync-pro'}
+    return {"status": "ok", "service": "medisync-pro"}
