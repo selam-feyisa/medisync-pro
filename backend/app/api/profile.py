@@ -88,3 +88,41 @@ async def get_preferences(
         await db.commit()
         await db.refresh(preferences)
     return preferences
+
+
+class PreferencesUpdate(BaseModel):
+    theme: Optional[str] = None
+    language: Optional[str] = None
+    timezone: Optional[str] = None
+    digest_frequency: Optional[str] = None
+
+
+@router.patch("/me/preferences")
+async def update_preferences(
+    request: PreferencesUpdate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update user preferences."""
+    from backend.app.models.user_preference import UserPreference
+    
+    result = await db.execute(
+        select(UserPreference).where(UserPreference.user_id == user.id)
+    )
+    preferences = result.scalar_one_or_none()
+    if not preferences:
+        preferences = UserPreference(user_id=user.id)
+        db.add(preferences)
+    
+    if request.theme:
+        preferences.theme = request.theme
+    if request.language:
+        preferences.language = request.language
+    if request.timezone:
+        preferences.timezone = request.timezone
+    if request.digest_frequency:
+        preferences.digest_frequency = request.digest_frequency
+    
+    await db.commit()
+    await db.refresh(preferences)
+    return preferences
