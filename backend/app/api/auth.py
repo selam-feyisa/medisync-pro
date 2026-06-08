@@ -11,7 +11,7 @@ from backend.app.core.security import (
 from backend.app.models.user import User, UserRole
 from backend.app.core.config import settings
 
-router = APIRouter(prefix='/api/v1/auth', tags=['Authentication'])
+router = APIRouter(prefix="/auth")
 
 class RegisterRequest(BaseModel):
     email: str

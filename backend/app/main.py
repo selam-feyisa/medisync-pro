@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.api.auth import router as auth_router
+from backend.app.api.profile import router as profile_router
 
 app = FastAPI(
     title="MediSync Pro",
@@ -17,7 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
+# AUTH ROUTES
+app.include_router(auth_router, prefix="/api/v1")
+
+# PROFILE ROUTES (IMPORTANT FIX)
+app.include_router(profile_router, prefix="/api/v1")
 
 @app.get("/health")
 def health():
