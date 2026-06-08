@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from pydantic import BaseModel
 from typing import Optional
 
@@ -67,3 +68,23 @@ async def delete_account(
     """Soft-delete user account."""
     user.is_deleted = True
     await db.commit()
+
+
+@router.get("/me/preferences")
+async def get_preferences(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get user preferences."""
+    from backend.app.models.user_preference import UserPreference
+    
+    result = await db.execute(
+        select(UserPreference).where(UserPreference.user_id == user.id)
+    )
+    preferences = result.scalar_one_or_none()
+    if not preferences:
+        preferences = UserPreference(user_id=user.id)
+        db.add(preferences)
+        await db.commit()
+        await db.refresh(preferences)
+    return preferences
