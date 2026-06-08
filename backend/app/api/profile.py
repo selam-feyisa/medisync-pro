@@ -57,3 +57,13 @@ async def change_password(
     user.hashed_password = hash_password(request.new_password)
     await db.commit()
     return {"message": "Password changed successfully"}
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_account(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft-delete user account."""
+    user.is_deleted = True
+    await db.commit()
