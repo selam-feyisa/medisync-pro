@@ -44,3 +44,10 @@ class User(Base, TimestampMixin):
         default=AuthProvider.local,
         nullable=False
     )
+    
+    timezone: Mapped[str] = mapped_column(String(50), default="UTC")
+
+    # Relationships
+    preferences: Mapped["UserPreference"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
