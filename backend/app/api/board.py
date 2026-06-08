@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from uuid import UUID
 
 from app.core.database import get_db
@@ -33,6 +34,22 @@ async def create_board(
     await db.commit()
     await db.refresh(board)
     return board
+
+
+@router.get("", response_model=list[BoardResponse])
+async def list_boards(
+    project_id: UUID | None = None,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> list[Board]:
+    """List all boards, optionally filtered by project."""
+    if project_id:
+        result = await db.execute(
+            select(Board).where(Board.project_id == project_id)
+        )
+    else:
+        result = await db.execute(select(Board))
+    return result.scalars().all()
 
 
 @router.get("/{board_id}", response_model=BoardResponse)
