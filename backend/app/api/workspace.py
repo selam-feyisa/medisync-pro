@@ -73,3 +73,27 @@ async def update_workspace(
 
     await db.commit()
     return workspace
+
+
+@router.delete("/{workspace_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_workspace(
+    workspace_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Soft-delete workspace (owner only)."""
+    workspace = await WorkspaceService.get_workspace_by_id(db, workspace_id)
+    if not workspace:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Workspace not found",
+        )
+    
+    if workspace.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only workspace owner can delete workspace",
+        )
+    
+    workspace.is_deleted = True
+    await db.commit()
