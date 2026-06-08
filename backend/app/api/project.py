@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models import User, Project, Workspace
 from app.schemas import ProjectCreate, ProjectResponse, ProjectUpdate
+from app.core.utils import generate_slug
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -29,7 +30,7 @@ async def create_project(
     project = Project(
         workspace_id=request.workspace_id,
         name=request.name,
-        slug=request.slug,
+        slug=request.slug or generate_slug(request.name),
         description=request.description,
         visibility=request.visibility,
     )
