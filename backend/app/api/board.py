@@ -90,3 +90,20 @@ async def update_board(
 
     await db.commit()
     return board
+
+
+@router.delete("/{board_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_board(
+    board_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Delete board."""
+    board = await db.get(Board, board_id)
+    if not board:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Board not found",
+        )
+    await db.delete(board)
+    await db.commit()
