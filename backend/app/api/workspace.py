@@ -97,3 +97,34 @@ async def delete_workspace(
     
     workspace.is_deleted = True
     await db.commit()
+
+
+class TransferOwnershipRequest(BaseModel):
+    new_owner_id: UUID
+
+
+@router.post("/{workspace_id}/transfer", response_model=WorkspaceResponse)
+async def transfer_ownership(
+    workspace_id: UUID,
+    request: TransferOwnershipRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Workspace:
+    """Transfer workspace ownership to another member."""
+    workspace = await WorkspaceService.get_workspace_by_id(db, workspace_id)
+    if not workspace:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Workspace not found",
+        )
+    
+    if workspace.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only workspace owner can transfer ownership",
+        )
+    
+    workspace.owner_id = request.new_owner_id
+    await db.commit()
+    await db.refresh(workspace)
+    return workspace
