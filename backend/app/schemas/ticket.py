@@ -1,49 +1,48 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import List, Optional
 from datetime import datetime
-import uuid
+from uuid import UUID
 
+from backend.app.constants import TicketPriority, TicketStatus
 
 class TicketBase(BaseModel):
-    title: str
+    title: str = Field(..., min_length=3, max_length=255)
     description: Optional[str] = None
-    priority: str = "medium"
-    status: str = "todo"
-    story_points: Optional[int] = None
+    priority: TicketPriority = TicketPriority.MEDIUM
+    status: TicketStatus = TicketStatus.TODO
     due_date: Optional[datetime] = None
-
+    story_points: Optional[float] = Field(0.0, ge=0)
+    position: Optional[int] = 0
 
 class TicketCreate(TicketBase):
-    column_id: uuid.UUID
-    position: int
-
+    column_id: UUID
 
 class TicketUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
-    priority: Optional[str] = None
-    status: Optional[str] = None
-    story_points: Optional[int] = None
+    priority: Optional[TicketPriority] = None
+    status: Optional[TicketStatus] = None
     due_date: Optional[datetime] = None
-    column_id: Optional[uuid.UUID] = None
-
-
-class TicketMove(BaseModel):
-    column_id: uuid.UUID
-    position: int
-
+    story_points: Optional[float] = None
+    position: Optional[int] = None
+    column_id: Optional[UUID] = None
+    sprint_id: Optional[UUID] = None
 
 class TicketResponse(TicketBase):
-    id: uuid.UUID
-    column_id: uuid.UUID
-    position: int
+    id: UUID
+    column_id: UUID
+    sprint_id: Optional[UUID] = None
+    created_by_id: UUID
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
 
+class TicketMove(BaseModel):
+    column_id: UUID
+    position: int
 
-class TicketDetailResponse(TicketResponse):
-    assignees: list[uuid.UUID] = []
-    labels: list[uuid.UUID] = []
-    comments_count: int = 0
-    attachments_count: int = 0
+class TicketListResponse(BaseModel):
+    items: List[TicketResponse]
+    total: int
