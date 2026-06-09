@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from backend.app.api.ticket_assignee import router as ticket_assignee_router
+from backend.app.api.ticket_label import router as ticket_label_router
 import uvicorn
 
 from backend.app.core.config import settings
@@ -42,6 +44,8 @@ app.include_router(sprint_router, prefix="/api/v1", tags=["Sprints"])
 app.include_router(ticket_router, prefix="/api/v1", tags=["Tickets"])
 app.include_router(comment_router, prefix="/api/v1", tags=["Comments"])
 app.include_router(label_router, prefix="/api/v1", tags=["Labels"])
+app.include_router(ticket_assignee_router, prefix="/api/v1", tags=["Ticket Assignees"])
+app.include_router(ticket_label_router, prefix="/api/v1", tags=["Ticket Labels"])
 
 @app.get("/health")
 async def health_check():
