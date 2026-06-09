@@ -1,73 +1,77 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update, desc
+from sqlalchemy.orm import joinedload
 from uuid import UUID
+from typing import List, Optional
 
-from app.models import Ticket, TicketAssignee, TicketLabel, User, Label
+from backend.app.models.ticket import Ticket, TicketPriority, TicketStatus
+from backend.app.models.ticket_assignee import TicketAssignee
+from backend.app.models.ticket_label import TicketLabel
+from backend.app.schemas.ticket import TicketCreate, TicketUpdate, TicketMove
+from backend.app.core.exceptions import NotFoundException, PermissionException
 
 
-class TicketService:
-    """Ticket business logic service."""
+async def get_tickets_by_column(db: AsyncSession, column_id: UUID) -> List[Ticket]:
+    result = await db.execute(
+        select(Ticket)
+        .options(joinedload(Ticket.assignees), joinedload(Ticket.labels))
+        .where(Ticket.column_id == column_id)
+        .order_by(Ticket.position)
+    )
+    return result.scalars().all()
 
-    @staticmethod
-    async def assign_user_to_ticket(
-        db: AsyncSession, ticket_id: UUID, user_id: UUID
-    ) -> TicketAssignee:
-        """Assign user to ticket."""
-        assignment = TicketAssignee(
-            ticket_id=ticket_id,
-            user_id=user_id,
-        )
-        db.add(assignment)
-        await db.flush()
-        return assignment
 
-    @staticmethod
-    async def remove_user_from_ticket(
-        db: AsyncSession, ticket_id: UUID, user_id: UUID
-    ) -> None:
-        """Remove user assignment from ticket."""
-        stmt = select(TicketAssignee).where(
-            (TicketAssignee.ticket_id == ticket_id)
-            & (TicketAssignee.user_id == user_id)
-        )
-        result = await db.execute(stmt)
-        assignment = result.scalars().first()
-        if assignment:
-            await db.delete(assignment)
+async def create_ticket(db: AsyncSession, data: TicketCreate, user_id: UUID) -> Ticket:
+    # Auto position (gap strategy)
+    max_pos_result = await db.execute(
+        select(Ticket.position).where(Ticket.column_id == data.column_id).order_by(desc(Ticket.position)).limit(1)
+    )
+    max_pos = max_pos_result.scalar() or 0
+    position = max_pos + 1000
 
-    @staticmethod
-    async def add_label_to_ticket(
-        db: AsyncSession, ticket_id: UUID, label_id: UUID
-    ) -> TicketLabel:
-        """Add label to ticket."""
-        label_assignment = TicketLabel(
-            ticket_id=ticket_id,
-            label_id=label_id,
-        )
-        db.add(label_assignment)
-        await db.flush()
-        return label_assignment
+    ticket = Ticket(
+        **data.dict(),
+        created_by_id=user_id,
+        position=position
+    )
+    db.add(ticket)
+    await db.commit()
+    await db.refresh(ticket)
+    return ticket
 
-    @staticmethod
-    async def get_ticket_assignees(
-        db: AsyncSession, ticket_id: UUID
-    ) -> list[User]:
-        """Get all users assigned to ticket."""
-        stmt = (
-            select(User)
-            .join(TicketAssignee)
-            .where(TicketAssignee.ticket_id == ticket_id)
-        )
-        result = await db.execute(stmt)
-        return result.scalars().all()
 
-    @staticmethod
-    async def get_ticket_labels(db: AsyncSession, ticket_id: UUID) -> list[Label]:
-        """Get all labels on ticket."""
-        stmt = (
-            select(Label)
-            .join(TicketLabel)
-            .where(TicketLabel.ticket_id == ticket_id)
-        )
-        result = await db.execute(stmt)
-        return result.scalars().all()
+async def update_ticket(db: AsyncSession, ticket_id: UUID, data: TicketUpdate) -> Ticket:
+    ticket = await db.get(Ticket, ticket_id)
+    if not ticket:
+        raise NotFoundException("Ticket not found")
+
+    for key, value in data.dict(exclude_unset=True).items():
+        setattr(ticket, key, value)
+
+    await db.commit()
+    await db.refresh(ticket)
+    return ticket
+
+
+async def move_ticket(db: AsyncSession, ticket_id: UUID, move_data: TicketMove) -> Ticket:
+    """Move ticket to new column with position gap strategy"""
+    ticket = await db.get(Ticket, ticket_id)
+    if not ticket:
+        raise NotFoundException("Ticket not found")
+
+    ticket.column_id = move_data.column_id
+    ticket.position = move_data.position
+
+    await db.commit()
+    await db.refresh(ticket)
+    return ticket
+
+
+async def delete_ticket(db: AsyncSession, ticket_id: UUID) -> bool:
+    ticket = await db.get(Ticket, ticket_id)
+    if not ticket:
+        raise NotFoundException("Ticket not found")
+    
+    await db.delete(ticket)
+    await db.commit()
+    return True
