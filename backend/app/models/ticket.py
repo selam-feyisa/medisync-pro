@@ -1,57 +1,48 @@
-import uuid
-import enum
-from datetime import datetime
-from sqlalchemy import String, Text, Enum, ForeignKey, Integer, DateTime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Enum as SQLEnum, DateTime, Boolean, Float
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from .base import Base, TimestampMixin
+import uuid
+from datetime import datetime
+from enum import Enum
 
+from backend.app.models.base import Base, TimestampMixin
 
-class Priority(str, enum.Enum):
-    low = "low"
-    medium = "medium"
-    high = "high"
-    critical = "critical"
+class TicketPriority(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
-
-class TicketStatus(str, enum.Enum):
-    backlog = "backlog"
-    todo = "todo"
-    in_progress = "in_progress"
-    in_review = "in_review"
-    done = "done"
-
+class TicketStatus(str, Enum):
+    TODO = "todo"
+    IN_PROGRESS = "in_progress"
+    REVIEW = "review"
+    DONE = "done"
 
 class Ticket(Base, TimestampMixin):
-    """Ticket model - atomic unit of work."""
     __tablename__ = "tickets"
 
-    column_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("columns.id"), nullable=False
-    )
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text)
-    priority: Mapped[Priority] = mapped_column(
-        Enum(Priority), default=Priority.medium, nullable=False
-    )
-    status: Mapped[TicketStatus] = mapped_column(
-        Enum(TicketStatus), default=TicketStatus.todo, nullable=False
-    )
-    position: Mapped[int] = mapped_column(Integer, nullable=False)
-    due_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    story_points: Mapped[int | None] = mapped_column(Integer, nullable=True)
-
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    priority = Column(SQLEnum(TicketPriority), default=TicketPriority.MEDIUM)
+    status = Column(SQLEnum(TicketStatus), default=TicketStatus.TODO)
+    position = Column(Integer, default=0)  # For drag-drop ordering
+    due_date = Column(DateTime)
+    story_points = Column(Float, default=0.0)
+    
+    column_id = Column(UUID(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"))
+    sprint_id = Column(UUID(as_uuid=True), ForeignKey("sprints.id", ondelete="SET NULL"), nullable=True)
+    created_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    
     # Relationships
-    column: Mapped["Column"] = relationship(back_populates="tickets")
-    assignees: Mapped[list["TicketAssignee"]] = relationship(
-        back_populates="ticket", cascade="all, delete-orphan"
-    )
-    labels: Mapped[list["TicketLabel"]] = relationship(
-        back_populates="ticket", cascade="all, delete-orphan"
-    )
-    comments: Mapped[list["Comment"]] = relationship(
-        back_populates="ticket", cascade="all, delete-orphan"
-    )
-    attachments: Mapped[list["FileAttachment"]] = relationship(
-        back_populates="ticket", cascade="all, delete-orphan"
-    )
+    column = relationship("Column", back_populates="tickets")
+    sprint = relationship("Sprint", back_populates="tickets")
+    created_by = relationship("User")
+    assignees = relationship("TicketAssignee", back_populates="ticket", cascade="all, delete-orphan")
+    labels = relationship("TicketLabel", back_populates="ticket", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
+    attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Ticket {self.title}>"
