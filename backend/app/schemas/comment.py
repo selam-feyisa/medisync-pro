@@ -1,49 +1,23 @@
-from pydantic import BaseModel
-from typing import Optional
-import uuid
-
+from pydantic import BaseModel, Field
+from typing import Optional, List
+from datetime import datetime
+from uuid import UUID
 
 class CommentBase(BaseModel):
-    body: str
-
+    body: str = Field(..., min_length=1, max_length=2000)
+    parent_id: Optional[UUID] = None
 
 class CommentCreate(CommentBase):
-    ticket_id: uuid.UUID
-    parent_id: Optional[uuid.UUID] = None
-
-
-class CommentUpdate(BaseModel):
-    body: Optional[str] = None
-
+    pass
 
 class CommentResponse(CommentBase):
-    id: uuid.UUID
-    ticket_id: uuid.UUID
-    author_id: uuid.UUID
-    is_edited: bool
-    parent_id: Optional[uuid.UUID] = None
-
-    class Config:
-        from_attributes = True
-
-
-class LabelBase(BaseModel):
-    name: str
-    color: str
-
-
-class LabelCreate(LabelBase):
-    workspace_id: uuid.UUID
-
-
-class LabelUpdate(BaseModel):
-    name: Optional[str] = None
-    color: Optional[str] = None
-
-
-class LabelResponse(LabelBase):
-    id: uuid.UUID
-    workspace_id: uuid.UUID
+    id: UUID
+    ticket_id: UUID
+    author_id: UUID
+    is_edited: bool = False
+    created_at: datetime
+    updated_at: datetime
+    replies: List['CommentResponse'] = []
 
     class Config:
         from_attributes = True
