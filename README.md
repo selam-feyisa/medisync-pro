@@ -47,3 +47,11 @@ make dev
 
 - `POST /api/v1/seed` → Seed demo data
 - Ticket routes under `/api/v1/tickets`
+## Day 8 Completed ✅
+
+- Enhanced Comment model with threading
+- Mention parsing (@username)
+- Full-text search with PostgreSQL `tsvector`
+- Search API: `GET /api/v1/workspaces/{workspace_id}/search?q=...`
+
+**Total Commits Progress:** Strong momentum on Ticket + Search features.
