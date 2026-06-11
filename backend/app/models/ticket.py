@@ -7,6 +7,7 @@ from enum import Enum
 
 from backend.app.models.base import Base, TimestampMixin
 
+
 class TicketPriority(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
@@ -19,6 +20,7 @@ class TicketStatus(str, Enum):
     REVIEW = "review"
     DONE = "done"
 
+
 class Ticket(Base, TimestampMixin):
     __tablename__ = "tickets"
 
@@ -27,14 +29,17 @@ class Ticket(Base, TimestampMixin):
     description = Column(Text)
     priority = Column(SQLEnum(TicketPriority), default=TicketPriority.MEDIUM)
     status = Column(SQLEnum(TicketStatus), default=TicketStatus.TODO)
-    position = Column(Integer, default=0)  # For drag-drop ordering
+    position = Column(Integer, default=0)
     due_date = Column(DateTime)
     story_points = Column(Float, default=0.0)
     
     column_id = Column(UUID(as_uuid=True), ForeignKey("columns.id", ondelete="CASCADE"))
     sprint_id = Column(UUID(as_uuid=True), ForeignKey("sprints.id", ondelete="SET NULL"), nullable=True)
     created_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    
+
+    # === NEW: Full-Text Search ===
+    search_vector = Column(Text)   # tsvector will be handled in migration later
+
     # Relationships
     column = relationship("Column", back_populates="tickets")
     sprint = relationship("Sprint", back_populates="tickets")
@@ -43,6 +48,3 @@ class Ticket(Base, TimestampMixin):
     labels = relationship("TicketLabel", back_populates="ticket", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
-
-    def __repr__(self):
-        return f"<Ticket {self.title}>"
