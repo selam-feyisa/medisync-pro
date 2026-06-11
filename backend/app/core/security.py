@@ -3,8 +3,25 @@ from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from backend.app.core.config import settings
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+def get_current_user(token=Depends(security)):
+    try:
+        payload = decode_token(token.credentials)
+
+        return {
+            "id": payload.get("sub"),
+            "role": payload.get("role"),
+            "clinic_id": payload.get("clinic_id"),
+        }
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 def hash_password(password: str) -> str:
     """Hash a plaintext password with bcrypt."""
