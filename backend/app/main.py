@@ -22,7 +22,7 @@ from backend.app.api.label import router as label_router
 from backend.app.api.ticket_assignee import router as ticket_assignee_router
 from backend.app.api.ticket_label import router as ticket_label_router
 from backend.app.api.search import router as search_router   # ← Search Router
-
+from backend.app.api.time_entry import router as time_entry_router
 app = FastAPI(
     title="MediSync Pro",
     version="1.0.0",
@@ -54,6 +54,7 @@ app.include_router(label_router, prefix="/api/v1", tags=["Labels"])
 app.include_router(ticket_assignee_router, prefix="/api/v1", tags=["Ticket Assignees"])
 app.include_router(ticket_label_router, prefix="/api/v1", tags=["Ticket Labels"])
 app.include_router(search_router, prefix="/api/v1", tags=["Search"])
+app.include_router(time_entry_router, prefix="/api/v1", tags=["Time Tracking"])
 # ====================================================
 
 @app.get("/health")
