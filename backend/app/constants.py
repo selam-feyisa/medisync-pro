@@ -41,3 +41,11 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 MAX_FILE_SIZE_MB = 10
 ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"]
 AVATAR_MAX_SIZE = 256  # pixels
+
+# Ticket related constants
+TICKET_PRIORITY_CHOICES = ["low", "medium", "high", "critical"]
+TICKET_STATUS_CHOICES = ["todo", "in_progress", "review", "done"]
+
+# Board & Sprint constants (if not already there)
+BOARD_TYPES = ["kanban", "scrum"]
+SPRINT_STATUSES = ["planning", "active", "completed"]
