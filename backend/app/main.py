@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Core imports
 from backend.app.core.config import settings
+from backend.app.core.database import get_db   # ← This is the missing import
 
 # Routers
 from backend.app.api.auth import router as auth_router
@@ -57,7 +59,7 @@ async def health_check():
     return {"status": "healthy", "version": "1.0.0"}
 
 
-# Development Seed Endpoint (placed near health check)
+# Development Seed Endpoint
 @app.post("/seed", tags=["Development"])
 async def run_seed(db: AsyncSession = Depends(get_db)):
     """Development only - Seed demo tickets"""
