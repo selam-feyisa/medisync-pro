@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Core imports
+# Core
 from backend.app.core.config import settings
-from backend.app.core.database import get_db   # ← This is the missing import
+from backend.app.core.database import get_db
 
 # Routers
 from backend.app.api.auth import router as auth_router
@@ -21,6 +21,7 @@ from backend.app.api.comment import router as comment_router
 from backend.app.api.label import router as label_router
 from backend.app.api.ticket_assignee import router as ticket_assignee_router
 from backend.app.api.ticket_label import router as ticket_label_router
+from backend.app.api.search import router as search_router   # ← Search Router
 
 app = FastAPI(
     title="MediSync Pro",
@@ -29,10 +30,10 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json"
 )
 
-# CORS Middleware
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "*"],  
+    allow_origins=["http://localhost:3000", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,6 +53,7 @@ app.include_router(comment_router, prefix="/api/v1", tags=["Comments"])
 app.include_router(label_router, prefix="/api/v1", tags=["Labels"])
 app.include_router(ticket_assignee_router, prefix="/api/v1", tags=["Ticket Assignees"])
 app.include_router(ticket_label_router, prefix="/api/v1", tags=["Ticket Labels"])
+app.include_router(search_router, prefix="/api/v1", tags=["Search"])
 # ====================================================
 
 @app.get("/health")
