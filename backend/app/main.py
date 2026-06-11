@@ -53,3 +53,11 @@ async def health_check():
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+    # Temporary seed endpoint (for development)
+@app.post("/seed")
+async def run_seed(db: AsyncSession = Depends(get_db)):
+    from scripts.seed_demo import seed_demo_tickets
+    # You need to pass real column_ids in real usage
+    await seed_demo_tickets(db, {"todo": None, "in_progress": None, "review": None})
+    return {"message": "Demo data seeded successfully!"}
