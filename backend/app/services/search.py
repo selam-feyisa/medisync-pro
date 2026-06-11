@@ -1,10 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
 from uuid import UUID
-from typing import List, Optional
+from typing import List
 
 from backend.app.models.ticket import Ticket
-from backend.app.core.exceptions import NotFoundException
 
 
 async def search_tickets(
@@ -13,12 +12,11 @@ async def search_tickets(
     query: str,
     limit: int = 20
 ) -> List[Ticket]:
-    """Full-text search on tickets within a specific workspace"""
+    """Full-text search on tickets within a workspace"""
     
     if not query or len(query.strip()) < 2:
         return []
     
-    # Search only tickets belonging to the workspace (via project -> board -> column)
     stmt = select(Ticket).where(
         text("""
             search_vector @@ plainto_tsquery(:query) 
@@ -29,7 +27,7 @@ async def search_tickets(
                 WHERE p.workspace_id = :workspace_id
             )
         """)
-    ).params(query=query, workspace_id=workspace_id).limit(limit)
+    ).params(query=query, workspace_id=workspace_id).limit(limit).order_by(text("ts_rank(search_vector, plainto_tsquery(:query)) DESC"))
     
     result = await db.execute(stmt)
     return result.scalars().all()
