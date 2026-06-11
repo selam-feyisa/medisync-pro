@@ -1,66 +1,46 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
+from typing import List
+import re
 
-from app.models import Comment, Ticket
+from backend.app.models.comment import Comment
+from backend.app.schemas.comment import CommentCreate
+from backend.app.core.exceptions import NotFoundException
 
 
-class CommentService:
-    """Comment business logic service."""
+async def create_comment(db: AsyncSession, ticket_id: UUID, data: CommentCreate, author_id: UUID) -> Comment:
+    comment = Comment(
+        ticket_id=ticket_id,
+        author_id=author_id,
+        body=data.body,
+        parent_id=data.parent_id
+    )
+    db.add(comment)
+    await db.commit()
+    await db.refresh(comment)
+    
+    # Parse mentions (will be used later for notifications)
+    mentions = parse_mentions(data.body)
+    if mentions:
+        print(f"👤 Mentioned users: {mentions}")  # TODO: Create notifications later
+    
+    return comment
 
-    @staticmethod
-    async def get_ticket_comments(
-        db: AsyncSession, ticket_id: UUID
-    ) -> list[Comment]:
-        """Get all top-level comments for ticket (threaded replies excluded)."""
-        stmt = (
-            select(Comment)
-            .where((Comment.ticket_id == ticket_id) & (Comment.parent_id.is_(None)))
-            .order_by(Comment.created_at.asc())
-        )
-        result = await db.execute(stmt)
-        return result.scalars().all()
 
-    @staticmethod
-    async def get_comment_replies(
-        db: AsyncSession, parent_id: UUID
-    ) -> list[Comment]:
-        """Get all replies to a comment."""
-        stmt = (
-            select(Comment)
-            .where(Comment.parent_id == parent_id)
-            .order_by(Comment.created_at.asc())
-        )
-        result = await db.execute(stmt)
-        return result.scalars().all()
+def parse_mentions(body: str) -> List[str]:
+    """Extract @username mentions from comment body"""
+    if not body:
+        return []
+    # Simple regex to find @ followed by word characters
+    matches = re.findall(r'@(\w+)', body)
+    return list(set(matches))  # Remove duplicates
 
-    @staticmethod
-    async def get_threaded_comments(
-        db: AsyncSession, ticket_id: UUID
-    ) -> list[dict]:
-        """Get comments with full thread structure."""
-        comments = await CommentService.get_ticket_comments(db, ticket_id)
-        result = []
 
-        for comment in comments:
-            replies = await CommentService.get_comment_replies(db, comment.id)
-            comment_dict = {
-                "id": comment.id,
-                "body": comment.body,
-                "author_id": comment.author_id,
-                "created_at": comment.created_at,
-                "is_edited": comment.is_edited,
-                "replies": [
-                    {
-                        "id": r.id,
-                        "body": r.body,
-                        "author_id": r.author_id,
-                        "created_at": r.created_at,
-                        "is_edited": r.is_edited,
-                    }
-                    for r in replies
-                ],
-            }
-            result.append(comment_dict)
-
-        return result
+async def get_ticket_comments(db: AsyncSession, ticket_id: UUID) -> List[Comment]:
+    result = await db.execute(
+        select(Comment)
+        .where(Comment.ticket_id == ticket_id)
+        .order_by(Comment.created_at)
+    )
+    return result.scalars().all()
