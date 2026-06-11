@@ -6,6 +6,7 @@ from datetime import datetime
 
 from backend.app.models.base import Base, TimestampMixin
 
+
 class Comment(Base, TimestampMixin):
     __tablename__ = "comments"
 
@@ -14,10 +15,15 @@ class Comment(Base, TimestampMixin):
     is_edited = Column(Boolean, default=False)
     edited_at = Column(DateTime, nullable=True)
     
-    ticket_id = Column(UUID(as_uuid=True), ForeignKey("tickets.id", ondelete="CASCADE"))
-    author_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    parent_id = Column(UUID(as_uuid=True), ForeignKey("comments.id", ondelete="SET NULL"), nullable=True)  # Threading support
+    ticket_id = Column(UUID(as_uuid=True), ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    parent_id = Column(UUID(as_uuid=True), ForeignKey("comments.id", ondelete="SET NULL"), nullable=True)
 
+    # Relationships
     ticket = relationship("Ticket", back_populates="comments")
     author = relationship("User")
+    parent = relationship("Comment", remote_side=[id], backref="replies")
     replies = relationship("Comment", backref="parent", remote_side=[id])
+
+    def __repr__(self):
+        return f"<Comment {self.id} on ticket {self.ticket_id}>"
