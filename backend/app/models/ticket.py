@@ -20,6 +20,8 @@ class TicketStatus(str, Enum):
     REVIEW = "review"
     DONE = "done"
 
+    
+
 
 class Ticket(Base, TimestampMixin):
     __tablename__ = "tickets"
@@ -48,3 +50,16 @@ class Ticket(Base, TimestampMixin):
     labels = relationship("TicketLabel", back_populates="ticket", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
+
+    # ==================== Full-Text Search Event Listener ====================
+from sqlalchemy import event
+import sqlalchemy as sa
+
+
+@event.listens_for(Ticket, 'before_insert')
+@event.listens_for(Ticket, 'before_update')
+def update_search_vector(mapper, connection, target):
+    """Automatically update search_vector before save for full-text search"""
+    search_text = f"{target.title or ''} {target.description or ''}".strip()
+    if search_text:
+        target.search_vector = sa.func.to_tsvector('english', search_text)
