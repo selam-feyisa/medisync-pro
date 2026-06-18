@@ -86,3 +86,28 @@ async def create_manual_entry(db: AsyncSession, user_id: UUID, workspace_id: UUI
     await redis_client.delete(active_key)
 
     return time_entry
+async def submit_time_entry(db: AsyncSession, entry_id: UUID, user_id: UUID):
+    """Submit time entry for approval"""
+    entry = await db.get(TimeEntry, entry_id)
+    if not entry or entry.user_id != user_id:
+        raise NotFoundException("Time entry not found")
+    
+    if entry.status != TimeEntryStatus.LOGGED:
+        raise ValidationException("Only logged entries can be submitted")
+    
+    entry.status = TimeEntryStatus.SUBMITTED
+    await db.commit()
+    await db.refresh(entry)
+    return entry
+
+
+async def approve_time_entry(db: AsyncSession, entry_id: UUID):
+    """Approve time entry (admin/manager only - role check in API later)"""
+    entry = await db.get(TimeEntry, entry_id)
+    if not entry:
+        raise NotFoundException("Time entry not found")
+    
+    entry.status = TimeEntryStatus.APPROVED
+    await db.commit()
+    await db.refresh(entry)
+    return entry
