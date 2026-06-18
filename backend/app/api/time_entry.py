@@ -6,7 +6,14 @@ from backend.app.core.database import get_db
 from backend.app.core.security import get_current_user
 from backend.app.models.user import User
 from backend.app.schemas.time_entry import TimeEntryStart, TimeEntryResponse, TimeEntryManual
-from backend.app.services.time_entry import start_timer, stop_timer, create_manual_entry, submit_time_entry, approve_time_entry
+from backend.app.services.time_entry import (
+    start_timer, 
+    stop_timer, 
+    create_manual_entry, 
+    submit_time_entry, 
+    approve_time_entry,
+    get_weekly_summary   # New import
+)
 
 router = APIRouter(prefix="/api/v1", tags=["Time Tracking"])
 
@@ -64,3 +71,14 @@ async def approve_time_entry_endpoint(
     """Approve a submitted time entry (admin/manager only)"""
     entry = await approve_time_entry(db, entry_id)
     return entry
+
+
+# New Weekly Report Endpoint
+@router.get("/users/me/time-entries/weekly", response_model=dict)
+async def get_my_weekly_summary(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get current user's weekly time tracking summary"""
+    summary = await get_weekly_summary(db, current_user.id)
+    return summary
