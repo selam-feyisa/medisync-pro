@@ -3,19 +3,24 @@ from typing import Optional
 from datetime import datetime
 from uuid import UUID
 
-from backend.app.constants import TimeEntryStatus  # We'll add this later if needed
 
 class TimeEntryBase(BaseModel):
     description: Optional[str] = None
     is_billable: bool = True
     ticket_id: Optional[UUID] = None
 
-class TimeEntryStart(BaseModel):
-    ticket_id: Optional[UUID] = None
-    description: Optional[str] = None
 
-class TimeEntryStop(BaseModel):
+class TimeEntryStart(TimeEntryBase):
+    pass
+
+
+class TimeEntryManual(BaseModel):
+    ticket_id: Optional[UUID] = None
+    started_at: datetime
+    stopped_at: datetime
     description: Optional[str] = None
+    is_billable: bool = True
+
 
 class TimeEntryResponse(TimeEntryBase):
     id: UUID
