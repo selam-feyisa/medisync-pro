@@ -32,14 +32,12 @@ async def stop_current_timer(
     entry = await stop_timer(db, current_user.id, description)
     return entry
 
-
 @router.post("/time-entries/manual", response_model=TimeEntryResponse)
 async def create_manual_time_entry(
-    # TODO: Add proper schema later
-    data: dict,
+    data: TimeEntryManual,   # Use the schema we created
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Create manual time entry (for past work)"""
-    # Basic implementation - expand later
-    return {"message": "Manual entry endpoint ready - will be expanded next"}
+    """Create manual time entry for past logged hours"""
+    entry = await create_manual_entry(db, current_user.id, current_user.workspace_id if hasattr(current_user, 'workspace_id') else None, data.dict())
+    return entry
