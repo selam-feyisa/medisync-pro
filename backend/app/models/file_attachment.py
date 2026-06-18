@@ -1,31 +1,30 @@
-import uuid
-from sqlalchemy import String, Integer, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from .base import Base, TimestampMixin
+import uuid
+
+from backend.app.models.base import Base, TimestampMixin
 
 
 class FileAttachment(Base, TimestampMixin):
-    """FileAttachment model - files attached to tickets."""
     __tablename__ = "file_attachments"
 
-    workspace_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("workspaces.id"), nullable=False
-    )
-    ticket_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("tickets.id"), nullable=True
-    )
-    uploader_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
-    )
-    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
-    storage_key: Mapped[str] = mapped_column(String(500), nullable=False)
-    file_size: Mapped[int] = mapped_column(Integer, nullable=False)
-    mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    is_image: Mapped[bool] = mapped_column(Boolean, default=False)
-    thumbnail_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    version: Mapped[int] = mapped_column(Integer, default=1)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workspace_id = Column(UUID(as_uuid=True), ForeignKey("workspaces.id"))
+    ticket_id = Column(UUID(as_uuid=True), ForeignKey("tickets.id"), nullable=True)
+    uploader_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    
+    original_filename = Column(String(255), nullable=False)
+    storage_key = Column(String(500), nullable=False)  # MinIO path
+    file_size = Column(Integer)  # bytes
+    mime_type = Column(String(100))
+    is_image = Column(Boolean, default=False)
+    thumbnail_key = Column(String(500), nullable=True)
+    version = Column(Integer, default=1)
 
     # Relationships
-    ticket: Mapped["Ticket"] = relationship(back_populates="attachments")
-    uploader: Mapped["User"] = relationship()
+    ticket = relationship("Ticket", back_populates="attachments")
+    uploader = relationship("User")
+
+    def __repr__(self):
+        return f"<FileAttachment {self.original_filename}>"
