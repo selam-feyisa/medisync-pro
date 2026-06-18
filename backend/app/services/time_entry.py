@@ -41,6 +41,32 @@ async def stop_timer(db: AsyncSession, user_id: UUID, description: str = None):
     active_key = f"active_timer:{user_id}"
     entry_id_str = await redis_client.get(active_key)
 
+async def create_manual_entry(db: AsyncSession, user_id: UUID, workspace_id: UUID, data: dict):
+    """Create manual time entry for past work"""
+    if data["stopped_at"] <= data["started_at"]:
+        raise ValidationException("Stopped time must be after started time")
+    
+    duration = int((data["stopped_at"] - data["started_at"]).total_seconds())
+    if duration > 86400:  # 24 hours
+        raise ValidationException("Duration cannot exceed 24 hours")
+
+    time_entry = TimeEntry(
+        workspace_id=workspace_id,
+        ticket_id=data.get("ticket_id"),
+        user_id=user_id,
+        started_at=data["started_at"],
+        stopped_at=data["stopped_at"],
+        duration_seconds=duration,
+        description=data.get("description"),
+        is_billable=data.get("is_billable", True),
+        status=TimeEntryStatus.LOGGED
+    )
+
+    db.add(time_entry)
+    await db.commit()
+    await db.refresh(time_entry)
+    return time_entry
+
     if not entry_id_str:
         raise NotFoundException("No active timer found for this user.")
 
