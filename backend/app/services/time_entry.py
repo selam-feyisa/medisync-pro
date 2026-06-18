@@ -111,3 +111,18 @@ async def approve_time_entry(db: AsyncSession, entry_id: UUID):
     await db.commit()
     await db.refresh(entry)
     return entry
+async def get_weekly_summary(db: AsyncSession, user_id: UUID):
+    """Get weekly time summary for current user"""
+    # Simple implementation - expand with proper date filtering later
+    result = await db.execute(
+        select(TimeEntry).where(TimeEntry.user_id == user_id)
+    )
+    entries = result.scalars().all()
+    
+    total_seconds = sum(e.duration_seconds or 0 for e in entries if e.duration_seconds)
+    
+    return {
+        "total_hours": round(total_seconds / 3600, 2),
+        "entries_count": len(entries),
+        "message": "Weekly summary ready (expand with date range later)"
+    }
