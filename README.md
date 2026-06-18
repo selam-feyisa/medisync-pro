@@ -63,3 +63,13 @@ make dev
 - ✅ Basic API endpoints
 
 **Next:** Approval workflow, reports, and full Day 9 completion.
+## Day 9 Completed ✅ (Time Tracking)
+
+- TimeEntry Model & Schema
+- Timer Start/Stop with Redis
+- Manual Entry Support
+- Submit / Approve Workflow
+- Weekly Summary Endpoint
+- Basic Tests
+
+**Next (Day 10):** File Attachments + MinIO integration
