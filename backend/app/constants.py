@@ -49,3 +49,8 @@ TICKET_STATUS_CHOICES = ["todo", "in_progress", "review", "done"]
 # Board & Sprint constants (if not already there)
 BOARD_TYPES = ["kanban", "scrum"]
 SPRINT_STATUSES = ["planning", "active", "completed"]
+
+# Time Tracking Constants
+TIME_ENTRY_STATUSES = ["running", "logged", "submitted", "approved", "rejected"]
+TIME_ENTRY_MAX_DURATION_HOURS = 24
+BILLABLE_DEFAULT = True
