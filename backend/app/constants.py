@@ -54,3 +54,5 @@ SPRINT_STATUSES = ["planning", "active", "completed"]
 TIME_ENTRY_STATUSES = ["running", "logged", "submitted", "approved", "rejected"]
 TIME_ENTRY_MAX_DURATION_HOURS = 24
 BILLABLE_DEFAULT = True
+# Time Tracking
+TIME_ENTRY_MAX_DURATION_SECONDS = 86400  # 24 hours
