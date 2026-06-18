@@ -55,3 +55,11 @@ make dev
 - Search API: `GET /api/v1/workspaces/{workspace_id}/search?q=...`
 
 **Total Commits Progress:** Strong momentum on Ticket + Search features.
+## Day 9 Progress (In Progress)
+
+- ✅ TimeEntry Model + Schema
+- ✅ Timer Start/Stop with Redis active timer tracking
+- ✅ Manual time entry support
+- ✅ Basic API endpoints
+
+**Next:** Approval workflow, reports, and full Day 9 completion.
