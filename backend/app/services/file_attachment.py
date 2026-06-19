@@ -55,3 +55,20 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
     await db.refresh(attachment)
     
     return attachment
+
+
+def ensure_bucket_exists():
+    """Ensure MinIO bucket exists (call on startup)"""
+    bucket_name = "medisync"
+    try:
+        if not minio_client.bucket_exists(bucket_name):
+            minio_client.make_bucket(bucket_name)
+            print(f"✅ Created MinIO bucket: {bucket_name}")
+        else:
+            print(f"✅ MinIO bucket '{bucket_name}' already exists")
+    except S3Error as e:
+        print(f"❌ MinIO bucket error: {e}")
+
+
+# Run bucket check when module is imported
+ensure_bucket_exists()
