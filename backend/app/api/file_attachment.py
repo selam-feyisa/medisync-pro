@@ -25,6 +25,9 @@ async def upload_attachment(
     try:
         workspace_id = getattr(current_user, 'workspace_id', None)
         
+        if not workspace_id:
+            raise HTTPException(status_code=400, detail="Workspace not found")
+
         attachment = await upload_file(
             db=db,
             ticket_id=ticket_id,
@@ -49,8 +52,14 @@ async def download_attachment(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Generate presigned download URL from MinIO"""
-    # TODO: Add permission check later
+    """Generate presigned download URL"""
+    # TODO: Add proper permission check later
     from backend.app.services.file_attachment import minio_client
-    # This is a placeholder - full implementation will come in next steps
-    return {"download_url": f"presigned-url-for-{attachment_id}", "expires_in": 3600}
+    try:
+        # For now return placeholder
+        return {
+            "download_url": f"http://localhost:9000/medisync/attachment-{attachment_id}",
+            "expires_in": 3600
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to generate download link")
