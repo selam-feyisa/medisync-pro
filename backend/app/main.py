@@ -76,6 +76,9 @@ async def run_seed(db: AsyncSession = Depends(get_db)):
         return {"status": "success", "message": "Demo data seeded successfully!"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    # Initialize services on startup
+from backend.app.services.file_attachment import ensure_bucket_exists
+ensure_bucket_exists()
 
 
 if __name__ == "__main__":
