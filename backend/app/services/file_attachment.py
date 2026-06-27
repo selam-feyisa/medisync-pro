@@ -49,6 +49,31 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
         mime_type=file.content_type,
         is_image=file.content_type.startswith("image/")
     )
+
+        # Thumbnail generation (if image)
+    if attachment.is_image:
+        try:
+            from PIL import Image
+            import io
+            
+            img = Image.open(io.BytesIO(file_data))
+            img.thumbnail((200, 200))
+            thumb_io = io.BytesIO()
+            img.save(thumb_io, format=img.format or 'PNG')
+            thumb_io.seek(0)
+            
+            thumb_key = storage_key.replace(".", "_thumb.")
+            minio_client.put_object(
+                bucket_name="medisync",
+                object_name=thumb_key,
+                data=thumb_io,
+                length=thumb_io.getbuffer().nbytes,
+                content_type=attachment.mime_type
+            )
+            attachment.thumbnail_key = thumb_key
+            await db.commit()
+        except Exception as e:
+            print(f"Thumbnail generation failed: {e}")
     
     db.add(attachment)
     await db.commit()
