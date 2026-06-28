@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "MediSync Pro",
-  description: "Healthcare Appointment & Project Management SaaS",
-  icons: {
-    icon: "/favicon.ico",
-  },
+  description: "Healthcare SaaS Platform",
 };
 
 export default function RootLayout({
@@ -16,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 font-sans">
+      <body className="min-h-screen bg-gray-50">
         {children}
       </body>
     </html>
