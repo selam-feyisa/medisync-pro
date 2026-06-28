@@ -4,28 +4,27 @@ import uvicorn
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Core
-from backend.app.core.config import settings
-from backend.app.core.database import get_db
+from app.core.config import settings
+from app.core.database import get_db
 
 # Routers
-from backend.app.api.auth import router as auth_router
-from backend.app.api.profile import router as profile_router
-from backend.app.api.workspace import router as workspace_router
-from backend.app.api.member import router as member_router
-from backend.app.api.project import router as project_router
-from backend.app.api.board import router as board_router
-from backend.app.api.column import router as column_router
-from backend.app.api.sprint import router as sprint_router
-from backend.app.api.ticket import router as ticket_router
-from backend.app.api.comment import router as comment_router
-from backend.app.api.label import router as label_router
-from backend.app.api.ticket_assignee import router as ticket_assignee_router
-from backend.app.api.ticket_label import router as ticket_label_router
-from backend.app.api.search import router as search_router   # ← Search Router
-from backend.app.api.time_entry import router as time_entry_router
-from backend.app.api.file_attachment import router as file_attachment_router
-from backend.app.api.file_attachment import router as file_attachment_router
-from backend.app.api.file_attachment import router as file_attachment_router
+from app.api.auth import router as auth_router
+from app.api.profile import router as profile_router
+from app.api.workspace import router as workspace_router
+from app.api.member import router as member_router
+from app.api.project import router as project_router
+from app.api.board import router as board_router
+from app.api.column import router as column_router
+from app.api.sprint import router as sprint_router
+from app.api.ticket import router as ticket_router
+from app.api.comment import router as comment_router
+from app.api.label import router as label_router
+from app.api.ticket_assignee import router as ticket_assignee_router
+from app.api.ticket_label import router as ticket_label_router
+from app.api.search import router as search_router
+from app.api.time_entry import router as time_entry_router
+from app.api.file_attachment import router as file_attachment_router
+
 app = FastAPI(
     title="MediSync Pro",
     version="1.0.0",
@@ -59,9 +58,7 @@ app.include_router(ticket_label_router, prefix="/api/v1", tags=["Ticket Labels"]
 app.include_router(search_router, prefix="/api/v1", tags=["Search"])
 app.include_router(time_entry_router, prefix="/api/v1", tags=["Time Tracking"])
 app.include_router(file_attachment_router, prefix="/api/v1", tags=["Attachments"])
-app.include_router(file_attachment_router, prefix="/api/v1", tags=["Attachments"])
-app.include_router(file_attachment_router, prefix="/api/v1", tags=["Attachments"])
-# ====================================================
+
 
 @app.get("/health")
 async def health_check():
@@ -78,9 +75,14 @@ async def run_seed(db: AsyncSession = Depends(get_db)):
         return {"status": "success", "message": "Demo data seeded successfully!"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
-    # Initialize services on startup
-from backend.app.services.file_attachment import ensure_bucket_exists
-ensure_bucket_exists()
+
+
+# Initialize services on startup
+try:
+    from app.services.file_attachment import ensure_bucket_exists
+    ensure_bucket_exists()
+except Exception as e:
+    print(f"Warning: Could not initialize services: {e}")
 
 
 if __name__ == "__main__":
