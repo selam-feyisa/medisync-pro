@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+/* Medical Theme Enhancements */
+.card {
+  @apply bg-white rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-sky-600 hover:bg-sky-700 text-white font-medium px-6 py-3 rounded-2xl transition;
+}
+
+.table-header {
+  @apply bg-gray-50 text-gray-600 font-medium py-4 px-6 text-left;
+}
