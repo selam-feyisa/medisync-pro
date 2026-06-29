@@ -1,7 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from minio import Minio
 from minio.error import S3Error
 from uuid import UUID, uuid4
+from datetime import timedelta
 from fastapi import UploadFile
 from app.core.config import settings
 from app.models.file_attachment import FileAttachment
@@ -97,6 +99,22 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
     await db.refresh(attachment)
     
     return attachment
+
+
+async def create_download_url(db: AsyncSession, attachment_id: UUID, expires: timedelta) -> str:
+    """Create a temporary download URL for a stored attachment."""
+    result = await db.execute(
+        select(FileAttachment).where(FileAttachment.id == attachment_id)
+    )
+    attachment = result.scalar_one_or_none()
+    if not attachment:
+        raise ValidationException("Attachment not found")
+
+    return minio_client.presigned_get_object(
+        bucket_name=settings.MINIO_BUCKET_NAME,
+        object_name=attachment.storage_key,
+        expires=expires,
+    )
 
 
 def ensure_bucket_exists():
