@@ -6,7 +6,11 @@ from datetime import timedelta
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.services.file_attachment import create_download_url, upload_file
+from app.services.file_attachment import (
+    create_download_url,
+    create_thumbnail_url,
+    upload_file,
+)
 from app.schemas.file_attachment import FileUploadResponse
 
 router = APIRouter()
@@ -70,3 +74,24 @@ async def download_attachment(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to generate download link")
+
+
+@router.get("/attachments/{attachment_id}/thumbnail")
+async def download_attachment_thumbnail(
+    attachment_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Generate presigned thumbnail URL"""
+    try:
+        thumbnail_url = await create_thumbnail_url(
+            db=db,
+            attachment_id=attachment_id,
+            expires=timedelta(hours=1),
+        )
+        return {
+            "thumbnail_url": thumbnail_url,
+            "expires_in": 3600
+        }
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Thumbnail not found")
