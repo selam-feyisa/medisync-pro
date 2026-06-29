@@ -40,6 +40,11 @@ async def upload_attachment(
             "id": attachment.id,
             "filename": attachment.original_filename,
             "download_url": f"/api/v1/attachments/{attachment.id}/download",
+            "thumbnail_url": (
+                f"/api/v1/attachments/{attachment.id}/thumbnail"
+                if attachment.thumbnail_key
+                else None
+            ),
             "message": "File uploaded successfully"
         }
     except Exception as e:
