@@ -117,6 +117,22 @@ async def create_download_url(db: AsyncSession, attachment_id: UUID, expires: ti
     )
 
 
+async def create_thumbnail_url(db: AsyncSession, attachment_id: UUID, expires: timedelta) -> str:
+    """Create a temporary download URL for an attachment thumbnail."""
+    result = await db.execute(
+        select(FileAttachment).where(FileAttachment.id == attachment_id)
+    )
+    attachment = result.scalar_one_or_none()
+    if not attachment or not attachment.thumbnail_key:
+        raise ValidationException("Attachment thumbnail not found")
+
+    return minio_client.presigned_get_object(
+        bucket_name=settings.MINIO_BUCKET_NAME,
+        object_name=attachment.thumbnail_key,
+        expires=expires,
+    )
+
+
 def ensure_bucket_exists():
     """Ensure MinIO bucket exists (call on startup)"""
     bucket_name = settings.MINIO_BUCKET_NAME
