@@ -7,6 +7,15 @@ from app.core.config import settings
 from app.models.file_attachment import FileAttachment
 from app.core.exceptions import ValidationException
 
+MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024
+ALLOWED_ATTACHMENT_TYPES = {
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "text/plain",
+}
+
 
 # MinIO Client
 minio_client = Minio(
@@ -20,8 +29,14 @@ minio_client = Minio(
 async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, file: UploadFile, uploader_id: UUID):
     """Upload file to MinIO and save record"""
     
-    # Validate file size (example: 10MB limit)
-    if file.size > 10 * 1024 * 1024:
+    if not file.filename:
+        raise ValidationException("File name is required")
+
+    content_type = file.content_type or "application/octet-stream"
+    if content_type not in ALLOWED_ATTACHMENT_TYPES:
+        raise ValidationException("Unsupported file type")
+
+    if file.size and file.size > MAX_ATTACHMENT_SIZE:
         raise ValidationException("File size exceeds 10MB limit")
     
     # Generate unique storage key
@@ -35,7 +50,7 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
         object_name=storage_key,
         data=file_data,
         length=len(file_data),
-        content_type=file.content_type
+        content_type=content_type
     )
     
     # Save to database
@@ -46,8 +61,8 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
         original_filename=file.filename,
         storage_key=storage_key,
         file_size=len(file_data),
-        mime_type=file.content_type,
-        is_image=file.content_type.startswith("image/")
+        mime_type=content_type,
+        is_image=content_type.startswith("image/")
     )
 
         # Thumbnail generation (if image)
