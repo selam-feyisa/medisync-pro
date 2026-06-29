@@ -89,7 +89,6 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
                 content_type=attachment.mime_type
             )
             attachment.thumbnail_key = thumb_key
-            await db.commit()
         except Exception as e:
             print(f"Thumbnail generation failed: {e}")
     
