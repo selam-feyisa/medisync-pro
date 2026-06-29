@@ -3,9 +3,9 @@ from minio import Minio
 from minio.error import S3Error
 from uuid import UUID, uuid4
 from fastapi import UploadFile
-from backend.app.core.config import settings
-from backend.app.models.file_attachment import FileAttachment
-from backend.app.core.exceptions import ValidationException
+from app.core.config import settings
+from app.models.file_attachment import FileAttachment
+from app.core.exceptions import ValidationException
 
 
 # MinIO Client
@@ -31,7 +31,7 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
     # Upload to MinIO
     file_data = await file.read()
     minio_client.put_object(
-        bucket_name="medisync",
+        bucket_name=settings.MINIO_BUCKET_NAME,
         object_name=storage_key,
         data=file_data,
         length=len(file_data),
@@ -64,7 +64,7 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
             
             thumb_key = storage_key.replace(".", "_thumb.")
             minio_client.put_object(
-                bucket_name="medisync",
+                bucket_name=settings.MINIO_BUCKET_NAME,
                 object_name=thumb_key,
                 data=thumb_io,
                 length=thumb_io.getbuffer().nbytes,
@@ -84,7 +84,7 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
 
 def ensure_bucket_exists():
     """Ensure MinIO bucket exists (call on startup)"""
-    bucket_name = "medisync"
+    bucket_name = settings.MINIO_BUCKET_NAME
     try:
         if not minio_client.bucket_exists(bucket_name):
             minio_client.make_bucket(bucket_name)
