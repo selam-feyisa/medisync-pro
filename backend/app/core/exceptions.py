@@ -50,3 +50,8 @@ class RateLimitError(APIException):
 
     def __init__(self, detail: str = "Rate limit exceeded"):
         super().__init__(429, detail)
+
+
+ValidationException = ValidationError
+NotFoundException = NotFoundError
+PermissionException = AuthorizationError
