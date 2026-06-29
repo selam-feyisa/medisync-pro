@@ -146,5 +146,3 @@ def ensure_bucket_exists():
         print(f"❌ MinIO bucket error: {e}")
 
 
-# Run bucket check when module is imported
-ensure_bucket_exists()
