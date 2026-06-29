@@ -31,3 +31,13 @@ class FileUploadResponse(BaseModel):
     download_url: str
     thumbnail_url: Optional[str] = None
     message: str = "File uploaded successfully"
+
+
+class AttachmentDownloadResponse(BaseModel):
+    download_url: str
+    expires_in: int = 3600
+
+
+class AttachmentThumbnailResponse(BaseModel):
+    thumbnail_url: str
+    expires_in: int = 3600
