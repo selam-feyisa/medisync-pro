@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      spacing: {
+        68: '17rem',
+      },
       colors: {
         primary: '#0ea5e9',      // Medical blue
         secondary: '#14b8a6',    // Teal
