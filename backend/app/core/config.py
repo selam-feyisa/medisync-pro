@@ -10,9 +10,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     ENCRYPTION_KEY: str
-    MINIO_URL: str = 'http://localhost:9000'
+    MINIO_URL: str = 'localhost:9000'
     MINIO_ACCESS_KEY: str = 'minioadmin'
     MINIO_SECRET_KEY: str = 'minioadmin'
+    MINIO_BUCKET_NAME: str = 'medisync'
 
     model_config = ConfigDict(
         env_file='.env',
@@ -22,11 +23,6 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
-    # MinIO Settings
-    MINIO_URL: str = "localhost:9000"
-    MINIO_ACCESS_KEY: str = "minioadmin"
-    MINIO_SECRET_KEY: str = "minioadmin"
-    MINIO_BUCKET_NAME: str = "medisync"
 
 settings = get_settings()
 
