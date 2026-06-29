@@ -11,7 +11,11 @@ from app.services.file_attachment import (
     create_thumbnail_url,
     upload_file,
 )
-from app.schemas.file_attachment import FileUploadResponse
+from app.schemas.file_attachment import (
+    AttachmentDownloadResponse,
+    AttachmentThumbnailResponse,
+    FileUploadResponse,
+)
 
 router = APIRouter()
 
@@ -55,7 +59,10 @@ async def upload_attachment(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/attachments/{attachment_id}/download")
+@router.get(
+    "/attachments/{attachment_id}/download",
+    response_model=AttachmentDownloadResponse,
+)
 async def download_attachment(
     attachment_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -76,7 +83,10 @@ async def download_attachment(
         raise HTTPException(status_code=500, detail="Failed to generate download link")
 
 
-@router.get("/attachments/{attachment_id}/thumbnail")
+@router.get(
+    "/attachments/{attachment_id}/thumbnail",
+    response_model=AttachmentThumbnailResponse,
+)
 async def download_attachment_thumbnail(
     attachment_id: UUID,
     db: AsyncSession = Depends(get_db),
