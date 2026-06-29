@@ -6,7 +6,7 @@ from datetime import timedelta
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.services.file_attachment import upload_file
+from app.services.file_attachment import create_download_url, upload_file
 from app.schemas.file_attachment import FileUploadResponse
 
 router = APIRouter()
@@ -53,11 +53,14 @@ async def download_attachment(
     current_user: User = Depends(get_current_user)
 ):
     """Generate presigned download URL"""
-    # TODO: Add proper permission check later
     try:
-        # For now return placeholder
+        download_url = await create_download_url(
+            db=db,
+            attachment_id=attachment_id,
+            expires=timedelta(hours=1),
+        )
         return {
-            "download_url": f"http://localhost:9000/medisync/attachment-{attachment_id}",
+            "download_url": download_url,
             "expires_in": 3600
         }
     except Exception as e:
