@@ -45,6 +45,9 @@ async def upload_file(db: AsyncSession, ticket_id: UUID, workspace_id: UUID, fil
     
     # Upload to MinIO
     file_data = await file.read()
+    if len(file_data) > MAX_ATTACHMENT_SIZE:
+        raise ValidationException("File size exceeds 10MB limit")
+
     minio_client.put_object(
         bucket_name=settings.MINIO_BUCKET_NAME,
         object_name=storage_key,
