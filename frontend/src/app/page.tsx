@@ -1,74 +1,85 @@
-'use client';
-
-import Link from 'next/link';
+﻿import { SectionHeader } from "@/components/section-header";
+import { StatCard } from "@/components/stat-card";
+import { StatusBadge } from "@/components/status-badge";
+import { activeProjects, dashboardStats, recentActivity, ticketColumns } from "@/lib/demo-data";
 
 export default function Dashboard() {
+  const activeTicketCount = ticketColumns.reduce((total, column) => total + column.count, 0);
+
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 p-6 hidden lg:block">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-9 h-9 bg-sky-600 rounded-xl flex items-center justify-center text-white text-xl">🏥</div>
-          <h1 className="text-2xl font-bold text-gray-900">MediSync</h1>
-        </div>
+    <div className="mx-auto flex max-w-7xl flex-col gap-6">
+      <SectionHeader
+        title="Clinic Operations Dashboard"
+        description="Monitor project work, patient coordination, and AfterQuery readiness from one workspace."
+        action={<StatusBadge tone="success">Day 10 in progress</StatusBadge>}
+      />
 
-        <nav className="space-y-2">
-          <Link href="/" className="flex items-center gap-3 px-4 py-3 text-sky-600 bg-sky-50 rounded-xl font-medium">
-            📊 Dashboard
-          </Link>
-          <Link href="/projects" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-xl text-gray-700">
-            📁 Projects
-          </Link>
-          <Link href="/tickets" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-xl text-gray-700">
-            🎟️ Tickets
-          </Link>
-          <Link href="/time-tracking" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-xl text-gray-700">
-            ⏱️ Time Tracking
-          </Link>
-          <Link href="/documents" className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 rounded-xl text-gray-700">
-            📄 Documents
-          </Link>
-        </nav>
-      </div>
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {dashboardStats.map((stat) => (
+          <StatCard key={stat.label} {...stat} />
+        ))}
+      </section>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          <div className="flex justify-between items-center mb-10">
+      <section className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">Good morning, Dr. Selam</h1>
-              <p className="text-gray-600 mt-1">Here's an overview of your clinic today</p>
+              <h2 className="text-lg font-semibold text-slate-950">Project Health</h2>
+              <p className="mt-1 text-sm text-slate-500">Active initiatives balanced across clinic and Silver work.</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">Friday, June 19 2026</p>
-            </div>
+            <StatusBadge tone="info">{activeProjects.length} active</StatusBadge>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <p className="text-gray-500">Today's Appointments</p>
-              <p className="text-5xl font-semibold mt-3">14</p>
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <p className="text-gray-500">Open Tickets</p>
-              <p className="text-5xl font-semibold mt-3 text-orange-600">7</p>
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <p className="text-gray-500">Hours Logged</p>
-              <p className="text-5xl font-semibold mt-3">8.5h</p>
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <p className="text-gray-500">Active Patients</p>
-              <p className="text-5xl font-semibold mt-3 text-emerald-600">23</p>
-            </div>
-          </div>
-
-          <div className="text-center text-gray-400 py-20">
-            More pages (Projects, Tickets, Time Tracking, Documents) coming soon...
+          <div className="mt-5 space-y-4">
+            {activeProjects.map((project) => (
+              <article key={project.key} className="rounded-lg border border-slate-100 p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-950">{project.name}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {project.key} - {project.owner} - due {project.due}
+                    </p>
+                  </div>
+                  <StatusBadge tone={project.status === "On track" ? "success" : "warning"}>
+                    {project.status}
+                  </StatusBadge>
+                </div>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full rounded-full bg-sky-600" style={{ width: `${project.progress}%` }} />
+                </div>
+                <p className="mt-2 text-xs text-slate-500">{project.tickets} tickets tracked</p>
+              </article>
+            ))}
           </div>
         </div>
-      </div>
+
+        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-950">Today&apos;s Work</h2>
+              <p className="mt-1 text-sm text-slate-500">A compact view of operational momentum.</p>
+            </div>
+            <StatusBadge tone="neutral">{activeTicketCount} tickets</StatusBadge>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {recentActivity.map((activity) => {
+              const Icon = activity.icon;
+              return (
+                <div key={activity.label} className="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-sky-700">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-900">{activity.label}</p>
+                    <p className="text-xs text-slate-500">{activity.time}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
