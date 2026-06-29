@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from passlib.context import CryptContext
 from jose import JWTError, jwt
-from backend.app.core.config import settings
+from app.core.config import settings
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer
 

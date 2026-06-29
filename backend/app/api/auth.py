@@ -9,7 +9,7 @@ from backend.app.core.security import (
     create_access_token, create_refresh_token
 )
 from backend.app.models.user import User, UserRole
-from backend.app.core.config import settings
+from app.core.config import settings
 
 router = APIRouter(prefix="/auth")
 
