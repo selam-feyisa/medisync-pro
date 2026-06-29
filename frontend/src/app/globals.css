@@ -3,15 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f8fafc;
+  --foreground: #0f172a;
 }
 
 body {
@@ -27,13 +20,13 @@ body {
 }
 /* Medical Theme Enhancements */
 .card {
-  @apply bg-white rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200;
+  @apply rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md;
 }
 
 .btn-primary {
-  @apply bg-sky-600 hover:bg-sky-700 text-white font-medium px-6 py-3 rounded-2xl transition;
+  @apply rounded-lg bg-sky-600 px-4 py-2.5 font-medium text-white transition hover:bg-sky-700;
 }
 
 .table-header {
-  @apply bg-gray-50 text-gray-600 font-medium py-4 px-6 text-left;
+  @apply bg-slate-50 px-4 py-3 text-left font-medium text-slate-600;
 }
