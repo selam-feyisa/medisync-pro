@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Link from "next/link";
+import { AppShell } from "@/components/app-shell";
 
 export const metadata: Metadata = {
   title: "MediSync Pro",
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-50">
-        {children}
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
