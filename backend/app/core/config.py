@@ -15,6 +15,13 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str = 'minioadmin'
     MINIO_BUCKET_NAME: str = 'medisync'
     FRONTEND_URL: str = 'http://localhost:3000'
+    # Optional SMTP settings for sending verification and reset emails
+    SMTP_HOST: str | None = None
+    SMTP_PORT: int | None = None
+    SMTP_USER: str | None = None
+    SMTP_PASSWORD: str | None = None
+    SMTP_TLS: bool = False
+    SMTP_FROM: str | None = None
 
     model_config = ConfigDict(
         env_file='.env',

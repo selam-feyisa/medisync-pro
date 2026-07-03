@@ -121,6 +121,8 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
         raise HTTPException(401, detail='Invalid email or password')
     if not user.is_active:
         raise HTTPException(403, detail='Account is disabled')
+    if not user.email_verified:
+        raise HTTPException(403, detail='Email address not verified')
     access_token = create_access_token(str(user.id), user.role.value)
     refresh_token, jti = create_refresh_token(str(user.id))
     r = aioredis.from_url(settings.REDIS_URL)
