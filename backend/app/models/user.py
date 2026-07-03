@@ -1,6 +1,8 @@
 import uuid
 import enum
 from sqlalchemy import String, Boolean, Enum, ForeignKey, Text
+from sqlalchemy import DateTime
+from sqlalchemy.sql import expression
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base, TimestampMixin
@@ -51,3 +53,10 @@ class User(Base, TimestampMixin):
     preferences: Mapped["UserPreference"] = relationship(
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
+
+    # Email verification
+    email_verified: Mapped[bool] = mapped_column(Boolean, server_default=expression.false(), nullable=False)
+
+    # Password reset fields
+    reset_token: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    reset_token_expires_at: Mapped[DateTime | None] = mapped_column(DateTime, nullable=True)

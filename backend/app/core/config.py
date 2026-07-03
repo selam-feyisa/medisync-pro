@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     MINIO_ACCESS_KEY: str = 'minioadmin'
     MINIO_SECRET_KEY: str = 'minioadmin'
     MINIO_BUCKET_NAME: str = 'medisync'
+    FRONTEND_URL: str = 'http://localhost:3000'
 
     model_config = ConfigDict(
         env_file='.env',

@@ -77,12 +77,14 @@ async def run_seed(db: AsyncSession = Depends(get_db)):
         return {"status": "error", "message": str(e)}
 
 
-# Initialize services on startup
-try:
-    from app.services.file_attachment import ensure_bucket_exists
-    ensure_bucket_exists()
-except Exception as e:
-    print(f"Warning: Could not initialize services: {e}")
+@app.on_event("startup")
+async def initialize_services():
+    """Initialize external service dependencies when the API starts."""
+    try:
+        from app.services.file_attachment import ensure_bucket_exists
+        ensure_bucket_exists()
+    except Exception as e:
+        print(f"Warning: Could not initialize services: {e}")
 
 
 if __name__ == "__main__":
