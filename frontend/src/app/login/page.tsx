@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showResendVerification, setShowResendVerification] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +28,9 @@ export default function LoginPage() {
       localStorage.setItem("refresh_token", json.refresh_token);
       router.push("/");
     } catch (err: any) {
-      setError(err.message || "Login failed");
+      const message = err.message || "Login failed";
+      setError(message);
+      setShowResendVerification(message.toLowerCase().includes("not verified"));
     } finally {
       setLoading(false);
     }
@@ -60,6 +63,14 @@ export default function LoginPage() {
         </div>
 
         {error && <div className="text-sm text-red-600">{error}</div>}
+        {showResendVerification && (
+          <p className="text-sm text-slate-600">
+            Need a new verification email?{' '}
+            <a href="/resend-verification" className="text-sky-600">
+              Resend verification
+            </a>
+          </p>
+        )}
 
         <div>
           <button
@@ -71,6 +82,11 @@ export default function LoginPage() {
         </div>
       </form>
 
+      <p className="mt-4 text-sm text-slate-600">
+        <a href="/forgot-password" className="text-sky-600">Forgot password?</a>{' '}
+        •{' '}
+        <a href="/resend-verification" className="text-sky-600">Resend verification</a>
+      </p>
       <p className="mt-4 text-sm text-slate-600">Don\'t have an account? <a href="/register" className="text-sky-600">Register</a></p>
     </div>
   );
