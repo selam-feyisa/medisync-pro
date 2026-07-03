@@ -40,10 +40,14 @@ async def get_my_profile(db: AsyncSession = Depends(get_db), token_user=Depends(
 @router.patch("/me")
 async def update_profile(
     request: ProfileUpdate,
-    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    token_user=Depends(get_current_user),
 ):
     """Update current user profile."""
+    result = await db.execute(select(User).where(User.id == token_user["id"]))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, detail="User not found")
     if request.full_name:
         user.full_name = request.full_name
     if request.timezone:
@@ -56,10 +60,14 @@ async def update_profile(
 @router.patch("/me/password")
 async def change_password(
     request: PasswordChange,
-    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    token_user=Depends(get_current_user),
 ):
     """Change user password with old password verification."""
+    result = await db.execute(select(User).where(User.id == token_user["id"]))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, detail="User not found")
     if not verify_password(request.old_password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -72,28 +80,31 @@ async def change_password(
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_account(
-    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    token_user=Depends(get_current_user),
 ):
     """Soft-delete user account."""
+    result = await db.execute(select(User).where(User.id == token_user["id"]))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, detail="User not found")
     user.is_deleted = True
     await db.commit()
 
 
 @router.get("/me/preferences")
 async def get_preferences(
-    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    token_user=Depends(get_current_user),
 ):
     """Get user preferences."""
     from backend.app.models.user_preference import UserPreference
-    
     result = await db.execute(
-        select(UserPreference).where(UserPreference.user_id == user.id)
+        select(UserPreference).where(UserPreference.user_id == token_user["id"])
     )
     preferences = result.scalar_one_or_none()
     if not preferences:
-        preferences = UserPreference(user_id=user.id)
+        preferences = UserPreference(user_id=token_user["id"])
         db.add(preferences)
         await db.commit()
         await db.refresh(preferences)
@@ -110,18 +121,17 @@ class PreferencesUpdate(BaseModel):
 @router.patch("/me/preferences")
 async def update_preferences(
     request: PreferencesUpdate,
-    user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    token_user=Depends(get_current_user),
 ):
     """Update user preferences."""
     from backend.app.models.user_preference import UserPreference
-    
     result = await db.execute(
-        select(UserPreference).where(UserPreference.user_id == user.id)
+        select(UserPreference).where(UserPreference.user_id == token_user["id"])
     )
     preferences = result.scalar_one_or_none()
     if not preferences:
-        preferences = UserPreference(user_id=user.id)
+        preferences = UserPreference(user_id=token_user["id"])
         db.add(preferences)
     
     if request.theme:
