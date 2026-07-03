@@ -113,6 +113,32 @@ async def password_reset_confirm(data: PasswordResetConfirm, db: AsyncSession = 
     await db.commit()
     return {'message': 'Password has been reset'}
 
+
+class ResendVerificationRequest(BaseModel):
+    email: str
+
+
+@router.post('/resend-verification')
+async def resend_verification(data: ResendVerificationRequest, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == data.email))
+    user = result.scalar_one_or_none()
+    if not user:
+        # don't reveal existence
+        return {'message': 'If an account exists, a verification email was sent'}
+    # simple rate limit: only allow resend every 5 minutes
+    from datetime import datetime, timedelta
+    now = datetime.utcnow()
+    if user.verification_sent_at and (now - user.verification_sent_at) < timedelta(minutes=5):
+        raise HTTPException(429, detail='Verification recently sent. Please wait before retrying')
+    token = secrets.token_urlsafe(32)
+    user.reset_token = token
+    user.reset_token_expires_at = now + timedelta(hours=48)
+    user.verification_sent_at = now
+    await db.commit()
+    verification_link = build_verification_link(token)
+    await send_email(user.email, 'Verify your email', f'Please verify your email by visiting: {verification_link}')
+    return {'message': 'If an account exists, a verification email was sent'}
+
 @router.post('/login', response_model=TokenResponse)
 async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == data.email))
