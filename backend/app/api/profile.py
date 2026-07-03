@@ -8,6 +8,9 @@ from backend.app.schemas.user import UserResponse
 from backend.app.core.security import get_current_user, verify_password, hash_password
 from backend.app.core.database import get_db
 from backend.app.models.user import User
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends
 
 router = APIRouter(prefix="/users", tags=["Profile"])
 
@@ -23,7 +26,14 @@ class PasswordChange(BaseModel):
 
 
 @router.get("/me")
-async def get_my_profile(user=Depends(get_current_user)):
+async def get_my_profile(db: AsyncSession = Depends(get_db), token_user=Depends(get_current_user)):
+    # token_user contains id from JWT payload
+    result = await db.execute(select(User).where(User.id == token_user["id"]))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(404, detail="User not found")
+    if not user.email_verified:
+        raise HTTPException(403, detail="Email not verified")
     return user
 
 
