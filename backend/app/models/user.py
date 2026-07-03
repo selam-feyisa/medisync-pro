@@ -60,3 +60,5 @@ class User(Base, TimestampMixin):
     # Password reset fields
     reset_token: Mapped[str | None] = mapped_column(String(255), nullable=True)
     reset_token_expires_at: Mapped[DateTime | None] = mapped_column(DateTime, nullable=True)
+    # Timestamp when verification email was last sent (rate-limit resend)
+    verification_sent_at: Mapped[DateTime | None] = mapped_column(DateTime, nullable=True)
