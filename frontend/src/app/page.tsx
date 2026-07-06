@@ -1,10 +1,47 @@
-﻿import { SectionHeader } from "@/components/section-header";
+﻿"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { SectionHeader } from "@/components/section-header";
 import { StatCard } from "@/components/stat-card";
 import { StatusBadge } from "@/components/status-badge";
 import { activeProjects, dashboardStats, recentActivity, ticketColumns } from "@/lib/demo-data";
 
 export default function Dashboard() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const activeTicketCount = ticketColumns.reduce((total, column) => total + column.count, 0);
+
+  useEffect(() => {
+    async function verifyAuth() {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+      try {
+        const res = await fetch("/api/v1/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          throw new Error("Session expired");
+        }
+      } catch (err: any) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        setError(err.message || "Session expired");
+        router.replace("/login");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    verifyAuth();
+  }, [router]);
+
+  if (loading) return <div className="p-6">Loading dashboard…</div>;
+  if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -13,6 +50,21 @@ export default function Dashboard() {
         description="Monitor project work, patient coordination, and AfterQuery readiness from one workspace."
         action={<StatusBadge tone="success">Day 10 in progress</StatusBadge>}
       />
+
+      <section className="grid gap-4 md:grid-cols-3">
+        <a href="/profile" className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:bg-slate-50">
+          <h3 className="font-semibold text-slate-950">Profile</h3>
+          <p className="mt-1 text-sm text-slate-500">Review your account details and update your profile.</p>
+        </a>
+        <a href="/projects" className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:bg-slate-50">
+          <h3 className="font-semibold text-slate-950">Projects</h3>
+          <p className="mt-1 text-sm text-slate-500">Jump into active workstreams and project boards.</p>
+        </a>
+        <a href="/tickets" className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:bg-slate-50">
+          <h3 className="font-semibold text-slate-950">Tickets</h3>
+          <p className="mt-1 text-sm text-slate-500">Track patient operations and service requests.</p>
+        </a>
+      </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {dashboardStats.map((stat) => (
