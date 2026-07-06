@@ -3,14 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from typing import List
 
-from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user
-from backend.app.models.user import User
-from backend.app.schemas.ticket import (
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.user import User
+from app.schemas.ticket import (
     TicketCreate, TicketUpdate, TicketResponse, 
     TicketMove, TicketListResponse
 )
-from backend.app.services.ticket import (
+from app.services.ticket import (
     create_ticket, get_tickets_by_column, 
     update_ticket, move_ticket, delete_ticket
 )

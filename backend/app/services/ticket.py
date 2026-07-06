@@ -4,11 +4,11 @@ from sqlalchemy.orm import joinedload
 from uuid import UUID
 from typing import List, Optional
 
-from backend.app.models.ticket import Ticket, TicketPriority, TicketStatus
-from backend.app.models.ticket_assignee import TicketAssignee
-from backend.app.models.ticket_label import TicketLabel
-from backend.app.schemas.ticket import TicketCreate, TicketUpdate, TicketMove
-from backend.app.core.exceptions import NotFoundException, PermissionException
+from app.models.ticket import Ticket, TicketPriority, TicketStatus
+from app.models.ticket_assignee import TicketAssignee
+from app.models.ticket_label import TicketLabel
+from app.schemas.ticket import TicketCreate, TicketUpdate, TicketMove
+from app.core.exceptions import NotFoundException, PermissionException
 
 
 async def get_tickets_by_column(db: AsyncSession, column_id: UUID) -> List[Ticket]:

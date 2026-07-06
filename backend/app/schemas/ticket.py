@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 from uuid import UUID
 
-from backend.app.constants import TicketPriority, TicketStatus
+from app.models.ticket import TicketPriority, TicketStatus
 
 class TicketBase(BaseModel):
     title: str = Field(..., min_length=3, max_length=255)
