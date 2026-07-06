@@ -3,7 +3,7 @@ from sqlalchemy import select, text
 from uuid import UUID
 from typing import List
 
-from backend.app.models.ticket import Ticket
+from app.models.ticket import Ticket
 
 
 async def search_tickets(
