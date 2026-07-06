@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user
-from backend.app.models.user import User
-from backend.app.schemas.time_entry import TimeEntryStart, TimeEntryResponse, TimeEntryManual
-from backend.app.services.time_entry import (
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.user import User
+from app.schemas.time_entry import TimeEntryStart, TimeEntryResponse, TimeEntryManual
+from app.services.time_entry import (
     start_timer, 
     stop_timer, 
     create_manual_entry, 

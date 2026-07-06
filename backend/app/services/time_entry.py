@@ -4,9 +4,9 @@ from uuid import UUID
 from datetime import datetime, timedelta
 import redis.asyncio as redis
 
-from backend.app.core.config import settings
-from backend.app.models.time_entry import TimeEntry, TimeEntryStatus
-from backend.app.core.exceptions import NotFoundException, ValidationException
+from app.core.config import settings
+from app.models.time_entry import TimeEntry, TimeEntryStatus
+from app.core.exceptions import NotFoundException, ValidationException
 
 
 redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
