@@ -4,10 +4,10 @@ from sqlalchemy import select
 from pydantic import BaseModel
 from typing import Optional
 
-from backend.app.schemas.user import UserResponse
-from backend.app.core.security import get_current_user, verify_password, hash_password
-from backend.app.core.database import get_db
-from backend.app.models.user import User
+from app.schemas.user import UserResponse
+from app.core.security import get_current_user, verify_password, hash_password
+from app.core.database import get_db
+from app.models.user import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
@@ -98,7 +98,7 @@ async def get_preferences(
     token_user=Depends(get_current_user),
 ):
     """Get user preferences."""
-    from backend.app.models.user_preference import UserPreference
+    from app.models.user_preference import UserPreference
     result = await db.execute(
         select(UserPreference).where(UserPreference.user_id == token_user["id"])
     )
@@ -125,7 +125,7 @@ async def update_preferences(
     token_user=Depends(get_current_user),
 ):
     """Update user preferences."""
-    from backend.app.models.user_preference import UserPreference
+    from app.models.user_preference import UserPreference
     result = await db.execute(
         select(UserPreference).where(UserPreference.user_id == token_user["id"])
     )

@@ -3,14 +3,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
 import redis.asyncio as aioredis
-from backend.app.core.database import get_db
-from backend.app.core.security import (
+from app.core.database import get_db
+from app.core.security import (
     hash_password, verify_password,
     create_access_token, create_refresh_token
 )
-from backend.app.models.user import User, UserRole
+from app.models.user import User, UserRole
 from app.core.config import settings
-from backend.app.core.email_utils import send_email, build_verification_link, build_reset_link
+from app.core.email_utils import send_email, build_verification_link, build_reset_link
 from datetime import datetime, timedelta
 import secrets
 
@@ -151,11 +151,14 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
         raise HTTPException(403, detail='Email address not verified')
     access_token = create_access_token(str(user.id), user.role.value)
     refresh_token, jti = create_refresh_token(str(user.id))
-    r = aioredis.from_url(settings.REDIS_URL)
-    await r.setex(
-        f'refresh:{user.id}:{jti}',
-        settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
-        '1'
-    )
-    await r.aclose()
+    try:
+        r = aioredis.from_url(settings.REDIS_URL)
+        await r.setex(
+            f'refresh:{user.id}:{jti}',
+            settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
+            '1'
+        )
+        await r.aclose()
+    except Exception as exc:
+        print(f'Warning: Redis unavailable, continuing without refresh token storage: {exc}')
     return TokenResponse(access_token=access_token, refresh_token=refresh_token)
