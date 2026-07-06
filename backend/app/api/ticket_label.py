@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
-from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user
-from backend.app.models.user import User
-from backend.app.services.ticket_label import add_label, remove_label
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.user import User
+from app.services.ticket_label import add_label, remove_label
 
 router = APIRouter(prefix="/tickets", tags=["Ticket Labels"])
 

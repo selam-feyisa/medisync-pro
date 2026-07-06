@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
 
-from backend.app.models.ticket_label import TicketLabel
-from backend.app.core.exceptions import NotFoundException
+from app.models.ticket_label import TicketLabel
+from app.core.exceptions import NotFoundException
 
 
 async def add_label(db: AsyncSession, ticket_id: UUID, label_id: UUID) -> TicketLabel:
