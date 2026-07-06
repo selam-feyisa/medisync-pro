@@ -1,12 +1,17 @@
+from importlib.util import find_spec
+
 from sqlalchemy.ext.asyncio import (
     AsyncSession, create_async_engine, async_sessionmaker
 )
 from app.core.config import settings
 
-# asyncpg driver requires postgresql+asyncpg:// prefix
-DATABASE_URL = settings.DATABASE_URL.replace(
-    'postgresql://', 'postgresql+asyncpg://'
-)
+# Use SQLite locally when PostgreSQL drivers are unavailable so the app still starts.
+DATABASE_URL = settings.DATABASE_URL
+if DATABASE_URL.startswith('postgresql') and find_spec('asyncpg') is None:
+    DATABASE_URL = 'sqlite+aiosqlite:///./medisync.db'
+    print('Warning: asyncpg is not installed; falling back to sqlite+aiosqlite for local development.')
+elif DATABASE_URL.startswith('postgresql://'):
+    DATABASE_URL = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
 
 engine = create_async_engine(
     DATABASE_URL,

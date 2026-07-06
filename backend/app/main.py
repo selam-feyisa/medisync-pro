@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # Core
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database import get_db, engine
+from app.models.base import Base
 
 # Routers
 from app.api.auth import router as auth_router
@@ -85,6 +86,12 @@ async def initialize_services():
         ensure_bucket_exists()
     except Exception as e:
         print(f"Warning: Could not initialize services: {e}")
+
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"Warning: Could not initialize database tables: {e}")
 
 
 if __name__ == "__main__":
