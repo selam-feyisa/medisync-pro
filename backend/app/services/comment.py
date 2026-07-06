@@ -4,9 +4,9 @@ from uuid import UUID
 from typing import List
 import re
 
-from backend.app.models.comment import Comment
-from backend.app.schemas.comment import CommentCreate
-from backend.app.core.exceptions import NotFoundException
+from app.models.comment import Comment
+from app.schemas.comment import CommentCreate
+from app.core.exceptions import NotFoundException
 
 
 async def create_comment(db: AsyncSession, ticket_id: UUID, data: CommentCreate, author_id: UUID) -> Comment:

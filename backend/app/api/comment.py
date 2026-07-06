@@ -3,11 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from typing import List
 
-from backend.app.core.database import get_db
-from backend.app.core.security import get_current_user
-from backend.app.models.user import User
-from backend.app.schemas.comment import CommentCreate, CommentResponse
-from backend.app.services.comment import create_comment, get_ticket_comments
+from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.user import User
+from app.schemas.comment import CommentCreate, CommentResponse
+from app.services.comment import create_comment, get_ticket_comments
 
 router = APIRouter()
 
