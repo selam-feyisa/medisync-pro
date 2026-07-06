@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
 
-from backend.app.models.ticket_assignee import TicketAssignee
-from backend.app.core.exceptions import NotFoundException
+from app.models.ticket_assignee import TicketAssignee
+from app.core.exceptions import NotFoundException
 
 
 async def add_assignee(db: AsyncSession, ticket_id: UUID, user_id: UUID) -> TicketAssignee:
