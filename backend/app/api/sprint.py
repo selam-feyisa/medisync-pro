@@ -109,6 +109,20 @@ async def start_sprint(
             detail="Only planning sprints can be started",
         )
     
+    # Validate no other active sprint exists for this board
+    result = await db.execute(
+        select(Sprint).where(
+            Sprint.board_id == sprint.board_id,
+            Sprint.status == SprintStatus.active
+        )
+    )
+    active_sprint = result.scalar_one_or_none()
+    if active_sprint:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Board already has an active sprint",
+        )
+    
     sprint.status = SprintStatus.active
     sprint.start_date = datetime.now(timezone.utc)
     await db.commit()
