@@ -50,6 +50,8 @@ class Ticket(Base, TimestampMixin):
     labels = relationship("TicketLabel", back_populates="ticket", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
+    blocking_dependencies = relationship("TicketDependency", foreign_keys="TicketDependency.blocker_id", back_populates="blocker")
+    blocked_dependencies = relationship("TicketDependency", foreign_keys="TicketDependency.blocked_id", back_populates="blocked")
 
     # ==================== Full-Text Search Event Listener ====================
 from sqlalchemy import event
