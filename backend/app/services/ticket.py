@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, desc
+from sqlalchemy import select, update, desc, and_
 from sqlalchemy.orm import joinedload
 from uuid import UUID
 from typing import List, Optional
@@ -7,6 +7,7 @@ from typing import List, Optional
 from app.models.ticket import Ticket, TicketPriority, TicketStatus
 from app.models.ticket_assignee import TicketAssignee
 from app.models.ticket_label import TicketLabel
+from app.models.audit_log import AuditLog
 from app.schemas.ticket import TicketCreate, TicketUpdate, TicketMove
 from app.core.exceptions import NotFoundException, PermissionException
 
@@ -53,14 +54,76 @@ async def update_ticket(db: AsyncSession, ticket_id: UUID, data: TicketUpdate) -
     return ticket
 
 
-async def move_ticket(db: AsyncSession, ticket_id: UUID, move_data: TicketMove) -> Ticket:
+async def move_ticket(db: AsyncSession, ticket_id: UUID, move_data: TicketMove, user_id: UUID) -> Ticket:
     """Move ticket to new column with position gap strategy"""
     ticket = await db.get(Ticket, ticket_id)
     if not ticket:
         raise NotFoundException("Ticket not found")
 
-    ticket.column_id = move_data.column_id
-    ticket.position = move_data.position
+    from_column_id = ticket.column_id
+    to_column_id = move_data.column_id
+    target_position = move_data.position
+
+    # Get neighbours in target column
+    neighbours = await db.execute(
+        select(Ticket)
+        .where(Ticket.column_id == to_column_id)
+        .where(Ticket.id != ticket_id)
+        .order_by(Ticket.position)
+    )
+    neighbour_tickets = neighbours.scalars().all()
+
+    # Find position between neighbours
+    prev_pos = 0
+    next_pos = None
+    for nt in neighbour_tickets:
+        if nt.position < target_position:
+            prev_pos = nt.position
+        elif nt.position > target_position:
+            next_pos = nt.position
+            break
+
+    # Check gap size
+    gap = (next_pos - prev_pos) if next_pos else 1000
+
+    if gap > 2:
+        # Insert in gap
+        new_position = prev_pos + (gap // 2)
+    else:
+        # Rebalance entire column with 1000-gap strategy
+        all_tickets = await db.execute(
+            select(Ticket)
+            .where(Ticket.column_id == to_column_id)
+            .order_by(Ticket.position)
+        )
+        column_tickets = all_tickets.scalars().all()
+        
+        # Add moving ticket to list
+        if ticket not in column_tickets:
+            column_tickets.append(ticket)
+        
+        # Sort by target position
+        column_tickets.sort(key=lambda t: t.position if t.id == ticket_id else t.position)
+        
+        # Reassign positions with 1000 gaps
+        for idx, t in enumerate(column_tickets):
+            t.position = idx * 1000
+            if t.id == ticket_id:
+                new_position = t.position
+
+    ticket.column_id = to_column_id
+    ticket.position = new_position
+
+    # Log move in AuditLog
+    audit_log = AuditLog(
+        workspace_id=ticket.column.board.project.workspace_id if ticket.column else None,
+        actor_id=user_id,
+        action="ticket.moved",
+        resource_type="ticket",
+        resource_id=ticket_id,
+        metadata={"from_column": str(from_column_id), "to_column": str(to_column_id)}
+    )
+    db.add(audit_log)
 
     await db.commit()
     await db.refresh(ticket)

@@ -55,7 +55,7 @@ async def move_existing_ticket(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    ticket = await move_ticket(db, ticket_id, move_data)
+    ticket = await move_ticket(db, ticket_id, move_data, current_user.id)
     return ticket
 
 
