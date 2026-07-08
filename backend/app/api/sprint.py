@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 from uuid import UUID
 from datetime import datetime, timezone
 
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.models import User, Sprint, Board
+from app.models import User, Sprint, Board, Ticket, Column
 from app.models.sprint import SprintStatus
+from app.models.ticket import TicketStatus
 from pydantic import BaseModel
 from typing import Optional
 
@@ -149,6 +150,37 @@ async def complete_sprint(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Only active sprints can be completed",
         )
+    
+    # Find or create backlog column
+    result = await db.execute(
+        select(Column).where(
+            Column.board_id == sprint.board_id,
+            Column.position == 0
+        )
+    )
+    backlog_column = result.scalar_one_or_none()
+    
+    if not backlog_column:
+        # Create backlog column
+        backlog_column = Column(
+            board_id=sprint.board_id,
+            name="Backlog",
+            position=0,
+            is_done_column=False
+        )
+        db.add(backlog_column)
+        await db.flush()
+    
+    # Move incomplete tickets to backlog
+    incomplete_tickets = await db.execute(
+        select(Ticket).where(
+            Ticket.sprint_id == sprint_id,
+            Ticket.status != TicketStatus.DONE
+        )
+    )
+    for ticket in incomplete_tickets.scalars():
+        ticket.column_id = backlog_column.id
+        ticket.sprint_id = None
     
     sprint.status = SprintStatus.completed
     sprint.end_date = datetime.now(timezone.utc)
