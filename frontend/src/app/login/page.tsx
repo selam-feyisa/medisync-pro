@@ -37,8 +37,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md py-12">
-      <h1 className="mb-4 text-2xl font-semibold">Sign in</h1>
+    <div className="mx-auto max-w-md py-12 px-4">
+      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 className="mb-6 text-2xl font-semibold text-slate-900">Sign in to your account</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium">Email</label>
@@ -62,7 +63,7 @@ export default function LoginPage() {
           />
         </div>
 
-        {error && <div className="text-sm text-red-600">{error}</div>}
+        {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
         {showResendVerification && (
           <p className="text-sm text-slate-600">
             Need a new verification email?{' '}
@@ -82,12 +83,14 @@ export default function LoginPage() {
         </div>
       </form>
 
-      <p className="mt-4 text-sm text-slate-600">
-        <a href="/forgot-password" className="text-sky-600">Forgot password?</a>{' '}
-        •{' '}
-        <a href="/resend-verification" className="text-sky-600">Resend verification</a>
-      </p>
-      <p className="mt-4 text-sm text-slate-600">Don\'t have an account? <a href="/register" className="text-sky-600">Register</a></p>
+      <div className="mt-4 space-y-2 text-sm text-slate-600">
+        <div className="flex justify-between">
+          <a href="/forgot-password" className="text-sky-600 hover:text-sky-700">Forgot password?</a>
+          <a href="/resend-verification" className="text-sky-600 hover:text-sky-700">Resend verification</a>
+        </div>
+        <p>Don't have an account? <a href="/register" className="text-sky-600 hover:text-sky-700">Register</a></p>
+      </div>
+      </div>
     </div>
   );
 }

@@ -32,8 +32,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md py-12">
-      <h1 className="mb-4 text-2xl font-semibold">Forgot password</h1>
+    <div className="mx-auto max-w-md py-12 px-4">
+      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 className="mb-6 text-2xl font-semibold text-slate-900">Forgot password</h1>
+        <p className="mb-6 text-sm text-slate-600">Enter your email address and we'll send you a link to reset your password.</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium">Email</label>
@@ -45,6 +47,8 @@ export default function ForgotPasswordPage() {
           <button disabled={loading} className="w-full rounded-lg bg-sky-600 px-4 py-2 text-white disabled:opacity-60">{loading? 'Sending...':'Send reset email'}</button>
         </div>
       </form>
+      <p className="mt-4 text-sm text-slate-600">Remember your password? <a href="/login" className="text-sky-600 hover:text-sky-700">Sign in</a></p>
+      </div>
     </div>
   );
 }

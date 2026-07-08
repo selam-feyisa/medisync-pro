@@ -10,10 +10,12 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
     setLoading(true);
     try {
       const res = await fetch("/api/v1/auth/register", {
@@ -23,7 +25,8 @@ export default function RegisterPage() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.detail || json.message || "Registration failed");
-      router.push('/login');
+      setSuccess("Registration successful! Please check your email to verify your account before signing in.");
+      setTimeout(() => router.push('/login'), 3000);
     } catch (err: any) {
       setError(err.message || "Registration failed");
     } finally {
@@ -48,7 +51,8 @@ export default function RegisterPage() {
           <input className="mt-1 w-full rounded-lg border px-3 py-2" value={password} onChange={(e) => setPassword(e.target.value)} type="password" required />
         </div>
 
-        {error && <div className="text-sm text-red-600">{error}</div>}
+        {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+        {success && <div className="rounded-lg bg-green-50 p-3 text-sm text-green-600">{success}</div>}
 
         <div>
           <button disabled={loading} className="w-full rounded-lg bg-sky-600 px-4 py-2 text-white disabled:opacity-60">
@@ -57,7 +61,8 @@ export default function RegisterPage() {
         </div>
       </form>
 
-      <p className="mt-4 text-sm text-slate-600">Already have an account? <a href="/login" className="text-sky-600">Sign in</a></p>
+      <p className="mt-4 text-sm text-slate-600">Already have an account? <a href="/login" className="text-sky-600 hover:text-sky-700">Sign in</a></p>
+      </div>
     </div>
   );
 }
