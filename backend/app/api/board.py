@@ -5,7 +5,8 @@ from uuid import UUID
 
 from app.core.database import get_db
 from app.core.security import get_current_user
-from app.models import User, Board, Project
+from app.models import User, Board, Project, Column
+from app.models.board import BoardType
 from app.schemas import BoardCreate, BoardResponse, BoardUpdate
 
 router = APIRouter(prefix="/boards", tags=["boards"])
@@ -31,6 +32,18 @@ async def create_board(
         board_type=request.board_type,
     )
     db.add(board)
+    await db.flush()
+
+    # Auto-create backlog column for Scrum boards
+    if request.board_type == BoardType.scrum:
+        backlog_column = Column(
+            board_id=board.id,
+            name="Backlog",
+            position=0,
+            is_done_column=False
+        )
+        db.add(backlog_column)
+
     await db.commit()
     await db.refresh(board)
     return board
