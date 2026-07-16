@@ -53,6 +53,12 @@ class User(Base, TimestampMixin):
     preferences: Mapped["UserPreference"] = relationship(
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
+    notification_preferences: Mapped["NotificationPreference"] = relationship(
+        back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
+    notifications: Mapped[list["Notification"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
     # Email verification
     email_verified: Mapped[bool] = mapped_column(Boolean, server_default=expression.false(), nullable=False)
