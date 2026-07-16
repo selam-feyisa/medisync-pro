@@ -77,3 +77,22 @@ def create_refresh_token(user_id: str) -> tuple[str, str]:
 def decode_token(token: str) -> dict:
     """Decode and verify a JWT. Raises JWTError if invalid or expired."""
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+
+
+async def get_current_user_ws(token: str):
+    """WebSocket authentication helper - decode token and return user dict."""
+    try:
+        payload = decode_token(token)
+        from app.core.database import get_db
+        from app.models.user import User
+        from sqlalchemy import select
+        from sqlalchemy.ext.asyncio import AsyncSession
+        
+        # Return minimal user info for WebSocket
+        return type('User', (), {
+            'id': UUID(payload.get("sub")),
+            'role': payload.get("role"),
+        })()
+        
+    except JWTError:
+        raise ValueError("Invalid or expired token")
