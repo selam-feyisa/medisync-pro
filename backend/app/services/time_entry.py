@@ -41,6 +41,27 @@ async def stop_timer(db: AsyncSession, user_id: UUID, description: str = None):
     active_key = f"active_timer:{user_id}"
     entry_id_str = await redis_client.get(active_key)
 
+    if not entry_id_str:
+        raise NotFoundException("No active timer found for this user.")
+
+    time_entry = await db.get(TimeEntry, UUID(entry_id_str))
+    if not time_entry:
+        await redis_client.delete(active_key)
+        raise NotFoundException("Time entry record not found.")
+
+    time_entry.stopped_at = datetime.utcnow()
+    time_entry.duration_seconds = int((time_entry.stopped_at - time_entry.started_at).total_seconds())
+    time_entry.status = TimeEntryStatus.LOGGED
+    if description:
+        time_entry.description = description
+
+    await db.commit()
+    await db.refresh(time_entry)
+    await redis_client.delete(active_key)
+
+    return time_entry
+
+
 async def create_manual_entry(db: AsyncSession, user_id: UUID, workspace_id: UUID, data: dict):
     """Create manual time entry for past work"""
     if data["stopped_at"] <= data["started_at"]:
@@ -65,26 +86,6 @@ async def create_manual_entry(db: AsyncSession, user_id: UUID, workspace_id: UUI
     db.add(time_entry)
     await db.commit()
     await db.refresh(time_entry)
-    return time_entry
-
-    if not entry_id_str:
-        raise NotFoundException("No active timer found for this user.")
-
-    time_entry = await db.get(TimeEntry, UUID(entry_id_str))
-    if not time_entry:
-        await redis_client.delete(active_key)
-        raise NotFoundException("Time entry record not found.")
-
-    time_entry.stopped_at = datetime.utcnow()
-    time_entry.duration_seconds = int((time_entry.stopped_at - time_entry.started_at).total_seconds())
-    time_entry.status = TimeEntryStatus.LOGGED
-    if description:
-        time_entry.description = description
-
-    await db.commit()
-    await db.refresh(time_entry)
-    await redis_client.delete(active_key)
-
     return time_entry
 async def submit_time_entry(db: AsyncSession, entry_id: UUID, user_id: UUID):
     """Submit time entry for approval"""
