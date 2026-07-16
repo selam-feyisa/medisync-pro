@@ -52,6 +52,7 @@ class Ticket(Base, TimestampMixin):
     attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
     blocking_dependencies = relationship("TicketDependency", foreign_keys="TicketDependency.blocker_id", back_populates="blocker")
     blocked_dependencies = relationship("TicketDependency", foreign_keys="TicketDependency.blocked_id", back_populates="blocked")
+    activities = relationship("TicketActivity", back_populates="ticket", cascade="all, delete-orphan")
 
     # ==================== Full-Text Search Event Listener ====================
 from sqlalchemy import event
@@ -65,3 +66,24 @@ def update_search_vector(mapper, connection, target):
     search_text = f"{target.title or ''} {target.description or ''}".strip()
     if search_text:
         target.search_vector = sa.func.to_tsvector('english', search_text)
+
+
+# ==================== Ticket Activity Auto-Logging ====================
+@event.listens_for(Ticket, 'after_insert')
+def log_ticket_creation(mapper, connection, target):
+    """Auto-log ticket creation activity"""
+    from app.models.ticket_activity import TicketActivity, TicketActivityType
+    
+    # This will be handled in the service layer to get user_id
+    # Event listener is limited here without session context
+    pass
+
+
+@event.listens_for(Ticket, 'after_update')
+def log_ticket_update(mapper, connection, target):
+    """Auto-log ticket update activity"""
+    from app.models.ticket_activity import TicketActivity, TicketActivityType
+    
+    # This will be handled in the service layer to get user_id
+    # Event listener is limited here without session context
+    pass

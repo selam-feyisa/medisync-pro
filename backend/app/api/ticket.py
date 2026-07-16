@@ -44,7 +44,7 @@ async def update_existing_ticket(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    ticket = await update_ticket(db, ticket_id, ticket_data)
+    ticket = await update_ticket(db, ticket_id, ticket_data, current_user.id)
     return ticket
 
 

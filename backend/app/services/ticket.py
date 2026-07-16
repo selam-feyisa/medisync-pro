@@ -8,6 +8,7 @@ from app.models.ticket import Ticket, TicketPriority, TicketStatus
 from app.models.ticket_assignee import TicketAssignee
 from app.models.ticket_label import TicketLabel
 from app.models.audit_log import AuditLog
+from app.models.ticket_activity import TicketActivity, TicketActivityType
 from app.schemas.ticket import TicketCreate, TicketUpdate, TicketMove
 from app.core.exceptions import NotFoundException, PermissionException
 
@@ -36,18 +37,48 @@ async def create_ticket(db: AsyncSession, data: TicketCreate, user_id: UUID) -> 
         position=position
     )
     db.add(ticket)
+    await db.flush()
+
+    # Auto-log creation activity
+    activity = TicketActivity(
+        ticket_id=ticket.id,
+        user_id=user_id,
+        action=TicketActivityType.created,
+        old_value=None,
+        new_value={"title": ticket.title, "priority": ticket.priority.value}
+    )
+    db.add(activity)
+
     await db.commit()
     await db.refresh(ticket)
     return ticket
 
 
-async def update_ticket(db: AsyncSession, ticket_id: UUID, data: TicketUpdate) -> Ticket:
+async def update_ticket(db: AsyncSession, ticket_id: UUID, data: TicketUpdate, user_id: UUID) -> Ticket:
     ticket = await db.get(Ticket, ticket_id)
     if not ticket:
         raise NotFoundException("Ticket not found")
 
+    old_values = {}
+    new_values = {}
+    
     for key, value in data.dict(exclude_unset=True).items():
+        old_values[key] = getattr(ticket, key)
         setattr(ticket, key, value)
+        new_values[key] = value
+
+    await db.flush()
+
+    # Auto-log update activity if changes were made
+    if old_values:
+        activity = TicketActivity(
+            ticket_id=ticket.id,
+            user_id=user_id,
+            action=TicketActivityType.updated,
+            old_value=old_values,
+            new_value=new_values
+        )
+        db.add(activity)
 
     await db.commit()
     await db.refresh(ticket)
