@@ -1,55 +1,61 @@
-import { Plus, Search } from "lucide-react";
-import { SectionHeader } from "@/components/section-header";
-import { StatusBadge } from "@/components/status-badge";
-import { ticketColumns } from "@/lib/demo-data";
+"use client";
+
+import { useState } from "react";
+import MainLayout from "@/components/layout/main-layout";
+import TicketList from "@/components/tickets/ticket-list";
 
 export default function TicketsPage() {
+  const [tickets] = useState([
+    {
+      id: "1",
+      title: "Implement user authentication",
+      description: "Add OAuth2 login with Google and GitHub providers",
+      status: "in_progress" as const,
+      priority: "high" as const,
+      assignee: "John Doe",
+      storyPoints: 5,
+      commentCount: 3,
+      attachmentCount: 1,
+    },
+    {
+      id: "2",
+      title: "Design dashboard UI",
+      description: "Create wireframes and mockups for the main dashboard",
+      status: "todo" as const,
+      priority: "medium" as const,
+      assignee: "Jane Smith",
+      storyPoints: 3,
+      commentCount: 0,
+      attachmentCount: 2,
+    },
+    {
+      id: "3",
+      title: "Setup database schema",
+      description: "Define PostgreSQL tables and relationships",
+      status: "done" as const,
+      priority: "critical" as const,
+      assignee: "Bob Johnson",
+      storyPoints: 8,
+      commentCount: 5,
+      attachmentCount: 0,
+    },
+  ]);
+
+  const handleTicketClick = (ticketId: string) => {
+    console.log("Clicked ticket:", ticketId);
+  };
+
+  const handleCreateTicket = () => {
+    console.log("Create new ticket");
+  };
+
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6">
-      <SectionHeader
-        title="Tickets"
-        description="Review work across backlog, active delivery, clinical review, and completed items."
-        action={
-          <button className="inline-flex h-10 items-center gap-2 rounded-lg bg-sky-600 px-3 text-sm font-medium text-white hover:bg-sky-700">
-            <Plus className="h-4 w-4" />
-            Ticket
-          </button>
-        }
+    <MainLayout>
+      <TicketList
+        tickets={tickets}
+        onTicketClick={handleTicketClick}
+        onCreateTicket={handleCreateTicket}
       />
-
-      <div className="relative max-w-xl">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        <input
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-sky-500"
-          placeholder="Search by ticket, assignee, or clinical workflow"
-        />
-      </div>
-
-      <section className="grid gap-4 xl:grid-cols-4">
-        {ticketColumns.map((column) => (
-          <div key={column.title} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold text-slate-950">{column.title}</h2>
-              <StatusBadge tone="neutral">{column.count}</StatusBadge>
-            </div>
-
-            <div className="space-y-3">
-              {column.tickets.map((ticket) => (
-                <article key={ticket.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-sky-700">{ticket.id}</span>
-                    <StatusBadge tone={ticket.priority === "High" ? "danger" : ticket.priority === "Medium" ? "warning" : "neutral"}>
-                      {ticket.priority}
-                    </StatusBadge>
-                  </div>
-                  <h3 className="mt-3 text-sm font-medium leading-5 text-slate-950">{ticket.title}</h3>
-                  <p className="mt-3 text-xs text-slate-500">Assigned to {ticket.assignee}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        ))}
-      </section>
-    </div>
+    </MainLayout>
   );
 }
