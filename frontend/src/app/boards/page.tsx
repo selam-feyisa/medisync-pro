@@ -5,7 +5,7 @@ import MainLayout from "@/components/layout/main-layout";
 import KanbanBoard from "@/components/boards/kanban-board";
 
 export default function BoardsPage() {
-  const [columns] = useState([
+  const [columns, setColumns] = useState([
     {
       id: "1",
       name: "To Do",
@@ -82,6 +82,28 @@ export default function BoardsPage() {
     console.log("Add new column");
   };
 
+  const handleTicketMove = (ticketId: string, targetColumnId: string) => {
+    setColumns(prevColumns => {
+      const newColumns = prevColumns.map(col => ({
+        ...col,
+        tickets: col.tickets.filter(t => t.id !== ticketId)
+      }));
+
+      const targetColumn = newColumns.find(col => col.id === targetColumnId);
+      if (targetColumn) {
+        const sourceColumn = prevColumns.find(col => col.tickets.some(t => t.id === ticketId));
+        if (sourceColumn) {
+          const ticket = sourceColumn.tickets.find(t => t.id === ticketId);
+          if (ticket) {
+            targetColumn.tickets.push(ticket);
+          }
+        }
+      }
+
+      return newColumns;
+    });
+  };
+
   return (
     <MainLayout>
       <KanbanBoard
@@ -89,6 +111,7 @@ export default function BoardsPage() {
         onTicketClick={handleTicketClick}
         onAddTicket={handleAddTicket}
         onAddColumn={handleAddColumn}
+        onTicketMove={handleTicketMove}
       />
     </MainLayout>
   );

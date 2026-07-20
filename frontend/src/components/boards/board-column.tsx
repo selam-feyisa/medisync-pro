@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { MoreHorizontal, Plus } from "lucide-react";
-import TicketCard from "../tickets/ticket-card";
+import SortableTicketCard from "./sortable-ticket-card";
 
 interface Ticket {
   id: string;
@@ -25,7 +26,7 @@ interface BoardColumnProps {
 }
 
 export default function BoardColumn({ id, name, tickets, onTicketClick, onAddTicket }: BoardColumnProps) {
-  const [isDragging, setIsDragging] = useState(false);
+  const { setNodeRef } = useDroppable({ id });
 
   return (
     <div className="flex-shrink-0 w-80 bg-slate-100 rounded-lg p-4">
@@ -42,15 +43,17 @@ export default function BoardColumn({ id, name, tickets, onTicketClick, onAddTic
         </button>
       </div>
 
-      {/* Tickets */}
-      <div className="space-y-3 min-h-[200px]">
-        {tickets.map((ticket) => (
-          <TicketCard
-            key={ticket.id}
-            {...ticket}
-            onClick={() => onTicketClick?.(ticket.id)}
-          />
-        ))}
+      {/* Droppable area */}
+      <div ref={setNodeRef} className="space-y-3 min-h-[200px]">
+        <SortableContext items={tickets.map(t => t.id)} strategy={verticalListSortingStrategy}>
+          {tickets.map((ticket) => (
+            <SortableTicketCard
+              key={ticket.id}
+              {...ticket}
+              onClick={() => onTicketClick?.(ticket.id)}
+            />
+          ))}
+        </SortableContext>
       </div>
 
       {/* Add ticket button */}
