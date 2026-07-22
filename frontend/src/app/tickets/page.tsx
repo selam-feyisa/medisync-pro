@@ -3,6 +3,8 @@
 import { useState } from "react";
 import MainLayout from "@/components/layout/main-layout";
 import TicketList from "@/components/tickets/ticket-list";
+import FilterBar, { FilterOptions } from "@/components/filters/filter-bar";
+import SortBar, { SortOption, SortDirection } from "@/components/filters/sort-bar";
 
 export default function TicketsPage() {
   const [tickets] = useState([
@@ -41,6 +43,10 @@ export default function TicketsPage() {
     },
   ]);
 
+  const [filters, setFilters] = useState<FilterOptions>({});
+  const [sortBy, setSortBy] = useState<SortOption>("created_at");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
   const handleTicketClick = (ticketId: string) => {
     console.log("Clicked ticket:", ticketId);
   };
@@ -49,8 +55,30 @@ export default function TicketsPage() {
     console.log("Create new ticket");
   };
 
+  const availableOptions = {
+    statuses: ["todo", "in_progress", "done"],
+    priorities: ["low", "medium", "high", "critical"],
+    assignees: ["John Doe", "Jane Smith", "Bob Johnson"],
+    labels: ["bug", "feature", "improvement"],
+  };
+
   return (
     <MainLayout>
+      <div className="mb-4 flex items-center gap-3">
+        <FilterBar
+          filters={filters}
+          onFiltersChange={setFilters}
+          availableOptions={availableOptions}
+        />
+        <SortBar
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSortChange={(newSortBy, newSortDirection) => {
+            setSortBy(newSortBy);
+            setSortDirection(newSortDirection);
+          }}
+        />
+      </div>
       <TicketList
         tickets={tickets}
         onTicketClick={handleTicketClick}
