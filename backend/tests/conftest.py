@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base
 from typing import AsyncGenerator
 
 from app.main import app
-from app.database import get_db
+from app.core.database import get_db
 
 # Test database URL
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -28,13 +28,14 @@ async def db() -> AsyncGenerator[AsyncSession, None]:
     async with TestAsyncSessionLocal() as session:
         async with test_engine.begin() as conn:
             # Create all tables
-            from app.models import Base
+            from app.models.base import Base
             await conn.run_sync(Base.metadata.create_all)
         
         yield session
         
         # Cleanup
         async with test_engine.begin() as conn:
+            from app.models.base import Base
             await conn.run_sync(Base.metadata.drop_all)
 
 @pytest.fixture
