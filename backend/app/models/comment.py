@@ -22,8 +22,8 @@ class Comment(Base, TimestampMixin):
     # Relationships
     ticket = relationship("Ticket", back_populates="comments")
     author = relationship("User")
-    parent = relationship("Comment", remote_side=[id], backref="replies")
-    replies = relationship("Comment", backref="parent", remote_side=[id])
+    parent = relationship("Comment", remote_side=[id], back_populates="replies")
+    replies = relationship("Comment", back_populates="parent", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Comment {self.id} on ticket {self.ticket_id}>"
