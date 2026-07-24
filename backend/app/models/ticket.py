@@ -50,8 +50,8 @@ class Ticket(Base, TimestampMixin):
     labels = relationship("TicketLabel", back_populates="ticket", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
     attachments = relationship("FileAttachment", back_populates="ticket", cascade="all, delete-orphan")
-    blocking_dependencies = relationship("TicketDependency", back_populates="blocker")
-    blocked_dependencies = relationship("TicketDependency", back_populates="blocked")
+    # blocking_dependencies = relationship("TicketDependency", back_populates="blocker")
+    # blocked_dependencies = relationship("TicketDependency", back_populates="blocked")
     activities = relationship("TicketActivity", back_populates="ticket", cascade="all, delete-orphan")
 
     # ==================== Full-Text Search Event Listener ====================
