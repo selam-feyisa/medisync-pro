@@ -49,7 +49,7 @@ class Ticket(Base, TimestampMixin):
     assignees = relationship("TicketAssignee", back_populates="ticket", cascade="all, delete-orphan")
     labels = relationship("TicketLabel", back_populates="ticket", cascade="all, delete-orphan")
     comments = relationship("Comment", back_populates="ticket", cascade="all, delete-orphan")
-    attachments = relationship("Attachment", back_populates="ticket", cascade="all, delete-orphan")
+    attachments = relationship("FileAttachment", back_populates="ticket", cascade="all, delete-orphan")
     blocking_dependencies = relationship("TicketDependency", foreign_keys="TicketDependency.blocker_id", back_populates="blocker")
     blocked_dependencies = relationship("TicketDependency", foreign_keys="TicketDependency.blocked_id", back_populates="blocked")
     activities = relationship("TicketActivity", back_populates="ticket", cascade="all, delete-orphan")
