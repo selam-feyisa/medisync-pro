@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import StaticPool
 
 from app.models.base import Base
 from app.core.config import get_settings
@@ -15,7 +15,7 @@ async def db_engine():
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
         echo=False,
-        poolclass=NullPool,
+        poolclass=StaticPool,
     )
 
     async with engine.begin() as conn:
@@ -72,3 +72,21 @@ def test_project_data():
         "description": "A project for testing",
         "visibility": "private",
     }
+
+
+@pytest.fixture
+async def client(db) -> "AsyncGenerator[AsyncClient, None]":
+    """Create a test client with database dependency override."""
+    from httpx import AsyncClient, ASGITransport
+    from app.main import app
+    from app.core.database import get_db
+
+    async def override_get_db():
+        yield db
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
+
+    app.dependency_overrides.clear()
