@@ -30,3 +30,4 @@ class Sprint(Base, TimestampMixin):
 
     # Relationships
     board: Mapped["Board"] = relationship(back_populates="sprints")
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="sprint")
