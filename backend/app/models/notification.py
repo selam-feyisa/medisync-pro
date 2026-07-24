@@ -29,7 +29,7 @@ class Notification(Base, TimestampMixin):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     message: Mapped[str] = mapped_column(String(1000), nullable=False)
     is_read: Mapped[bool] = mapped_column(Boolean, default=False)
-    data: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # Additional metadata
+    data: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Additional metadata
     action_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Relationships

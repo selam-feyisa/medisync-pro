@@ -16,6 +16,7 @@ class Label(Base, TimestampMixin):
     color: Mapped[str] = mapped_column(String(7), nullable=False)  # hex color code
 
     # Relationships
+    workspace: Mapped["Workspace"] = relationship(back_populates="labels")
     tickets: Mapped[list["TicketLabel"]] = relationship(
         back_populates="label", cascade="all, delete-orphan"
     )

@@ -26,7 +26,7 @@ class Appointment(Base, TimestampMixin):
 
     clinic_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey('clinics.id'),
+        ForeignKey('workspaces.id'),
         nullable=False
     )
 

@@ -65,7 +65,10 @@ def update_search_vector(mapper, connection, target):
     """Automatically update search_vector before save for full-text search"""
     search_text = f"{target.title or ''} {target.description or ''}".strip()
     if search_text:
-        target.search_vector = sa.func.to_tsvector('english', search_text)
+        if connection.dialect.name == 'sqlite':
+            target.search_vector = search_text
+        else:
+            target.search_vector = sa.func.to_tsvector('english', search_text)
 
 
 # ==================== Ticket Activity Auto-Logging ====================

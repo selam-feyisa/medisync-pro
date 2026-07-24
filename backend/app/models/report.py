@@ -26,8 +26,8 @@ class Report(Base, TimestampMixin):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     report_type: Mapped[ReportType] = mapped_column(String(50), nullable=False)
-    filters: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # Report filters
-    config: Mapped[dict | None] = mapped_column(JSONB, nullable=True)  # Report configuration
+    filters: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Report filters
+    config: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # Report configuration
     is_public: Mapped[bool] = mapped_column(default=False)  # Share with workspace
 
     # Relationships

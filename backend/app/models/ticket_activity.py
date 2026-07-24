@@ -27,8 +27,8 @@ class TicketActivity(Base, TimestampMixin):
     action: Mapped[TicketActivityType] = mapped_column(
         String(50), nullable=False
     )
-    old_value: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    new_value: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    old_value: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    new_value: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
     ticket: Mapped["Ticket"] = relationship(back_populates="activities")

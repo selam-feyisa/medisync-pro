@@ -16,7 +16,7 @@ class Patient(Base, TimestampMixin):
         UUID(as_uuid=True), ForeignKey('users.id'), nullable=True
     )
     clinic_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey('clinics.id'), nullable=False
+        UUID(as_uuid=True), ForeignKey('workspaces.id'), nullable=False
     )
     mrn: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
     date_of_birth_encrypted: Mapped[str | None] = mapped_column(Text)
