@@ -28,8 +28,10 @@ class TicketDependency(Base, TimestampMixin):
 
     # Relationships
     blocker: Mapped["Ticket"] = relationship(
-        foreign_keys=[blocker_id], back_populates="blocking_dependencies"
+        foreign_keys=[blocker_id]
+        # back_populates="blocking_dependencies"
     )
     blocked: Mapped["Ticket"] = relationship(
-        foreign_keys=[blocked_id], back_populates="blocked_dependencies"
+        foreign_keys=[blocked_id]
+        # back_populates="blocked_dependencies"
     )
