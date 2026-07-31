@@ -4,6 +4,7 @@ from .base import Base, TimestampMixin
 from .board import Board, BoardType
 from .column import Column
 from .comment import Comment
+from .feature_flag import FeatureFlag
 from .file_attachment import FileAttachment
 from .label import Label
 from .notification import Notification, NotificationType
@@ -33,6 +34,7 @@ __all__ = [
     'Board', 'BoardType',
     'Column',
     'Comment',
+    'FeatureFlag',
     'FileAttachment',
     'Label',
     'Notification', 'NotificationType',
