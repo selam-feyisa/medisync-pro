@@ -1,75 +1,189 @@
-# MediSync Pro 🏥
+# DevFlow Pro
 
-**Healthcare Appointment & Records SaaS** with built-in Project Management (Kanban + Scrum).
+**Project Management & Collaboration Platform** - A comprehensive Kanban and Scrum-based project management system with advanced features.
 
 ## Features
 
-- **Multi-role Authentication** (Admin, Doctor, Nurse, Receptionist, Patient)
-- **Workspace & Project Management** (like Jira/Linear)
-- **Appointment & Medical Records** system
-- **File Storage** with MinIO
-- **Real-time ready** architecture
+- **User Authentication & Authorization** - JWT-based auth with refresh tokens, role-based access control
+- **Workspace & Project Management** - Multi-tenant workspaces with projects and boards
+- **Kanban Boards** - Drag-and-drop ticket management with columns
+- **Scrum Sprints** - Sprint planning, tracking, and velocity metrics
+- **Ticket Management** - Full CRUD, assignees, labels, comments, dependencies
+- **Time Tracking** - Timer-based and manual time entry with approval workflow
+- **File Attachments** - File upload and management with MinIO
+- **Search & Filtering** - Full-text search with advanced filtering and sorting
+- **Team Management** - Team member management with role assignments
+- **Permissions System** - Granular role-based permissions configuration
+- **Analytics Dashboard** - Metrics, charts, and activity tracking
+- **Reports Generation** - Export reports in PDF, CSV, and Excel formats
+- **Real-time Updates** - WebSocket support for live updates
+- **Notifications** - In-app notification system
 
 ## Tech Stack
 
-- **Backend**: FastAPI + Python
-- **Database**: PostgreSQL (async)
-- **Cache**: Redis
-- **Storage**: MinIO
-- **Auth**: JWT + Refresh tokens
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS, Lucide Icons
+- **Backend**: FastAPI, Python 3.11+
+- **Database**: PostgreSQL with async SQLAlchemy
+- **Cache**: Redis for caching and session management
+- **Storage**: MinIO for file storage
+- **Authentication**: JWT with refresh tokens
+- **Real-time**: WebSocket support
+- **Testing**: Pytest with async support
 - **Container**: Docker Compose
+
+## Project Structure
+
+```
+medisync-pro/
+├── backend/                 # FastAPI backend
+│   ├── app/
+│   │   ├── api/            # API endpoints
+│   │   ├── core/           # Core utilities (database, security, etc.)
+│   │   ├── models/         # SQLAlchemy models
+│   │   ├── schemas/        # Pydantic schemas
+│   │   ├── services/       # Business logic
+│   │   └── websocket/      # WebSocket handlers
+│   ├── tests/              # Integration tests
+│   └── requirements.txt
+├── frontend/               # Next.js frontend
+│   ├── src/
+│   │   ├── app/            # Next.js app router pages
+│   │   ├── components/     # React components
+│   │   ├── hooks/          # Custom React hooks
+│   │   └── lib/            # Utilities and API client
+│   └── package.json
+└── docker-compose.yml      # Development environment
+```
 
 ## Quick Start
 
 ```bash
-# 1. Clone
+# 1. Clone the repository
 git clone https://github.com/selam-feyisa/medisync-pro.git
 cd medisync-pro
 
-# 2. Copy env
-cp .env.example .env
-# Edit .env with your secrets
+# 2. Set up environment variables
+cp backend/.env.example backend/.env
+# Edit .env with your configuration
 
-# 3. Start services
-make up
+# 3. Start services with Docker Compose
+docker-compose up -d
 
-# 4. Run backend
-make dev
-## Current Progress (Day 7 Complete)
+# 4. Run database migrations (if needed)
+cd backend
+python -m alembic upgrade head
 
-- ✅ Foundation & Auth (Days 1-5)
-- ✅ Projects, Boards, Sprints (Day 6)
-- ✅ Ticket CRUD + Move + Assignees + Labels + Comments (Day 7)
+# 5. Seed demo data
+python -m app.seed
 
-**Next:** Full comment threading, bulk operations, search (Day 8)
+# 6. Start the backend server
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-## Available Endpoints (Current)
+# 7. Start the frontend (in another terminal)
+cd frontend
+npm install
+npm run dev
+```
 
-- `POST /api/v1/seed` → Seed demo data
-- Ticket routes under `/api/v1/tickets`
-## Day 8 Completed ✅
+## Development
 
-- Enhanced Comment model with threading
-- Mention parsing (@username)
-- Full-text search with PostgreSQL `tsvector`
-- Search API: `GET /api/v1/workspaces/{workspace_id}/search?q=...`
+### Backend Development
 
-**Total Commits Progress:** Strong momentum on Ticket + Search features.
-## Day 9 Progress (In Progress)
+```bash
+cd backend
 
-- ✅ TimeEntry Model + Schema
-- ✅ Timer Start/Stop with Redis active timer tracking
-- ✅ Manual time entry support
-- ✅ Basic API endpoints
+# Install dependencies
+pip install -r requirements.txt
 
-**Next:** Approval workflow, reports, and full Day 9 completion.
-## Day 9 Completed ✅ (Time Tracking)
+# Run tests
+pytest tests/ -v
 
-- TimeEntry Model & Schema
-- Timer Start/Stop with Redis
-- Manual Entry Support
-- Submit / Approve Workflow
-- Weekly Summary Endpoint
-- Basic Tests
+# Run with auto-reload
+uvicorn app.main:app --reload
+```
 
-**Next (Day 10):** File Attachments + MinIO integration
+### Frontend Development
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+npm start
+```
+
+## API Documentation
+
+Once the backend is running, visit:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+## Roadmap Completion
+
+**All 25 days of the development roadmap have been completed:**
+
+- ✅ Days 1-5: Foundation, Authentication, User Management
+- ✅ Days 6-7: Workspaces, Projects, Boards, Sprints
+- ✅ Days 8-9: Ticket Management, Search, Time Tracking
+- ✅ Days 10-12: File Attachments, Notifications, Comments
+- ✅ Days 13-15: Integration Tests, Caching, Rate Limiting
+- ✅ Days 16-18: Frontend Layout, Components, API Integration
+- ✅ Days 19-20: Drag & Drop, WebSocket, File Upload UI, Time Tracking UI
+- ✅ Days 21-22: User Profile, Settings, Search, Filtering & Sorting
+- ✅ Days 23-24: Team Management, Permissions, Analytics, Reports
+- ✅ Day 25: Testing, Bug Fixes, Documentation
+
+## Testing
+
+Integration tests are included for:
+- Tickets CRUD operations
+- Sprint management
+- Notifications
+
+Run tests with:
+```bash
+cd backend
+pytest tests/ -v
+```
+
+## Deployment
+
+### Production Deployment
+
+1. Set environment variables for production
+2. Build Docker images
+3. Deploy to your preferred hosting platform
+4. Configure PostgreSQL, Redis, and MinIO
+5. Run database migrations
+6. Start services
+
+### Environment Variables
+
+Key environment variables (see `.env.example`):
+- `DATABASE_URL`: PostgreSQL connection string
+- `REDIS_URL`: Redis connection string
+- `MINIO_ENDPOINT`: MinIO endpoint
+- `JWT_SECRET`: Secret for JWT token signing
+- `SECRET_KEY`: FastAPI secret key
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new features
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Support
+
+For issues and questions, please open an issue on GitHub.

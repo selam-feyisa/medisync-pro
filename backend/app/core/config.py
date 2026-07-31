@@ -22,6 +22,16 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str | None = None
     SMTP_TLS: bool = False
     SMTP_FROM: str | None = None
+    # OAuth settings for Google and GitHub
+    GOOGLE_CLIENT_ID: str | None = None
+    GOOGLE_CLIENT_SECRET: str | None = None
+    GITHUB_CLIENT_ID: str | None = None
+    GITHUB_CLIENT_SECRET: str | None = None
+    # AI settings
+    OPENAI_API_KEY: str | None = None
+    # Stripe settings
+    STRIPE_SECRET_KEY: str | None = None
+    STRIPE_WEBHOOK_SECRET: str | None = None
 
     model_config = ConfigDict(
         env_file='.env',

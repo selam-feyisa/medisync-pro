@@ -22,6 +22,8 @@ from .user import User, UserRole, AuthProvider
 from .user_preference import UserPreference, Theme, DigestFrequency
 from .workspace import Workspace, PlanType
 from .workspace_member import WorkspaceMember, MemberRole
+from .ai_usage_log import AIUsageLog
+from .workspace_ai_quota import WorkspaceAIQuota
 
 __all__ = [
     'Appointment', 'AppointmentStatus', 'AppointmentType',
@@ -47,4 +49,6 @@ __all__ = [
     'UserPreference', 'Theme', 'DigestFrequency',
     'Workspace', 'PlanType',
     'WorkspaceMember', 'MemberRole',
+    'AIUsageLog',
+    'WorkspaceAIQuota',
 ]

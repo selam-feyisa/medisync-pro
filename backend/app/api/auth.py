@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel
@@ -8,9 +8,10 @@ from app.core.security import (
     hash_password, verify_password,
     create_access_token, create_refresh_token
 )
-from app.models.user import User, UserRole
+from app.models.user import User, UserRole, AuthProvider
 from app.core.config import settings
 from app.core.email_utils import send_email, build_verification_link, build_reset_link
+from app.core.oauth import get_google_oauth, get_github_oauth
 from datetime import datetime, timedelta
 import secrets
 
@@ -162,3 +163,175 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
     except Exception as exc:
         print(f'Warning: Redis unavailable, continuing without refresh token storage: {exc}')
     return TokenResponse(access_token=access_token, refresh_token=refresh_token)
+
+
+# OAuth Endpoints
+
+@router.get('/google')
+async def google_login(request: Request):
+    """Redirect to Google OAuth authorization page."""
+    google_oauth = get_google_oauth()
+    if not google_oauth:
+        raise HTTPException(501, detail='Google OAuth not configured')
+    
+    redirect_uri = f"{settings.FRONTEND_URL}/auth/google/callback"
+    state = secrets.token_urlsafe(32)
+    auth_url = google_oauth.get_auth_url(redirect_uri, state)
+    
+    return {"auth_url": auth_url, "state": state}
+
+
+@router.get('/google/callback')
+async def google_callback(code: str, state: str, db: AsyncSession = Depends(get_db)):
+    """Handle Google OAuth callback."""
+    google_oauth = get_google_oauth()
+    if not google_oauth:
+        raise HTTPException(501, detail='Google OAuth not configured')
+    
+    redirect_uri = f"{settings.FRONTEND_URL}/auth/google/callback"
+    
+    try:
+        # Exchange code for token
+        token_data = await google_oauth.exchange_code_for_token(code, redirect_uri)
+        access_token = token_data.get("access_token")
+        
+        # Get user info
+        user_info = await google_oauth.get_user_info(access_token)
+        email = user_info.get("email")
+        full_name = user_info.get("name")
+        
+        if not email:
+            raise HTTPException(400, detail='Unable to retrieve email from Google')
+        
+        # Find or create user
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+        
+        if user:
+            # Update existing user
+            if user.auth_provider != AuthProvider.google:
+                user.auth_provider = AuthProvider.google
+            if not user.email_verified:
+                user.email_verified = True
+            if full_name and not user.full_name:
+                user.full_name = full_name
+        else:
+            # Create new user
+            user = User(
+                email=email,
+                full_name=full_name or email.split('@')[0],
+                hashed_password=hash_password(secrets.token_urlsafe(32)),  # Random password
+                role=UserRole.patient,
+                auth_provider=AuthProvider.google,
+                email_verified=True,
+                is_active=True
+            )
+            db.add(user)
+        
+        await db.commit()
+        await db.refresh(user)
+        
+        # Generate tokens
+        access_token_jwt = create_access_token(str(user.id), user.role.value)
+        refresh_token_jwt, jti = create_refresh_token(str(user.id))
+        
+        try:
+            r = aioredis.from_url(settings.REDIS_URL)
+            await r.setex(
+                f'refresh:{user.id}:{jti}',
+                settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
+                '1'
+            )
+            await r.aclose()
+        except Exception as exc:
+            print(f'Warning: Redis unavailable, continuing without refresh token storage: {exc}')
+        
+        return TokenResponse(access_token=access_token_jwt, refresh_token=refresh_token_jwt)
+    
+    except Exception as e:
+        raise HTTPException(400, detail=f'OAuth authentication failed: {str(e)}')
+
+
+@router.get('/github')
+async def github_login(request: Request):
+    """Redirect to GitHub OAuth authorization page."""
+    github_oauth = get_github_oauth()
+    if not github_oauth:
+        raise HTTPException(501, detail='GitHub OAuth not configured')
+    
+    redirect_uri = f"{settings.FRONTEND_URL}/auth/github/callback"
+    state = secrets.token_urlsafe(32)
+    auth_url = github_oauth.get_auth_url(redirect_uri, state)
+    
+    return {"auth_url": auth_url, "state": state}
+
+
+@router.get('/github/callback')
+async def github_callback(code: str, state: str, db: AsyncSession = Depends(get_db)):
+    """Handle GitHub OAuth callback."""
+    github_oauth = get_github_oauth()
+    if not github_oauth:
+        raise HTTPException(501, detail='GitHub OAuth not configured')
+    
+    redirect_uri = f"{settings.FRONTEND_URL}/auth/github/callback"
+    
+    try:
+        # Exchange code for token
+        token_data = await github_oauth.exchange_code_for_token(code, redirect_uri)
+        access_token = token_data.get("access_token")
+        
+        # Get user info
+        user_info = await github_oauth.get_user_info(access_token)
+        email = user_info.get("email")
+        full_name = user_info.get("name") or user_info.get("login")
+        
+        if not email:
+            raise HTTPException(400, detail='Unable to retrieve email from GitHub (make sure email is public)')
+        
+        # Find or create user
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
+        
+        if user:
+            # Update existing user
+            if user.auth_provider != AuthProvider.github:
+                user.auth_provider = AuthProvider.github
+            if not user.email_verified:
+                user.email_verified = True
+            if full_name and not user.full_name:
+                user.full_name = full_name
+        else:
+            # Create new user
+            user = User(
+                email=email,
+                full_name=full_name or email.split('@')[0],
+                hashed_password=hash_password(secrets.token_urlsafe(32)),  # Random password
+                role=UserRole.patient,
+                auth_provider=AuthProvider.github,
+                email_verified=True,
+                is_active=True
+            )
+            db.add(user)
+        
+        await db.commit()
+        await db.refresh(user)
+        
+        # Generate tokens
+        access_token_jwt = create_access_token(str(user.id), user.role.value)
+        refresh_token_jwt, jti = create_refresh_token(str(user.id))
+        
+        try:
+            r = aioredis.from_url(settings.REDIS_URL)
+            await r.setex(
+                f'refresh:{user.id}:{jti}',
+                settings.REFRESH_TOKEN_EXPIRE_DAYS * 86400,
+                '1'
+            )
+            await r.aclose()
+        except Exception as exc:
+            print(f'Warning: Redis unavailable, continuing without refresh token storage: {exc}')
+        
+        return TokenResponse(access_token=access_token_jwt, refresh_token=refresh_token_jwt)
+    
+    except Exception as e:
+        raise HTTPException(400, detail=f'OAuth authentication failed: {str(e)}')

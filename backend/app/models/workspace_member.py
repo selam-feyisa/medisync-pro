@@ -7,10 +7,11 @@ from .base import Base, TimestampMixin
 
 
 class MemberRole(str, enum.Enum):
-    owner = "owner"
     admin = "admin"
-    member = "member"
-    viewer = "viewer"
+    doctor = "doctor"
+    nurse = "nurse"
+    receptionist = "receptionist"
+    patient = "patient"
 
 
 class WorkspaceMember(Base, TimestampMixin):
