@@ -9,6 +9,7 @@ from .file_attachment import FileAttachment
 from .label import Label
 from .notification import Notification, NotificationType
 from .notification_preference import NotificationPreference
+from .oauth_client import OAuthClient
 from .patient import Patient, BloodType
 from .plan import Plan, PlanType
 from .project import Project, Visibility
@@ -22,6 +23,8 @@ from .ticket_label import TicketLabel
 from .time_entry import TimeEntry, TimeEntryStatus
 from .user import User, UserRole, AuthProvider
 from .user_preference import UserPreference, Theme, DigestFrequency
+from .webhook_delivery import WebhookDelivery
+from .webhook_subscription import WebhookSubscription
 from .workspace import Workspace, PlanType as WorkspacePlanType
 from .workspace_member import WorkspaceMember, MemberRole
 from .workspace_subscription import WorkspaceSubscription, SubscriptionStatus
@@ -39,6 +42,7 @@ __all__ = [
     'Label',
     'Notification', 'NotificationType',
     'NotificationPreference',
+    'OAuthClient',
     'Patient', 'BloodType',
     'Plan', 'PlanType',
     'Project', 'Visibility',
@@ -52,6 +56,8 @@ __all__ = [
     'TimeEntry', 'TimeEntryStatus',
     'User', 'UserRole', 'AuthProvider',
     'UserPreference', 'Theme', 'DigestFrequency',
+    'WebhookDelivery',
+    'WebhookSubscription',
     'Workspace', 'WorkspacePlanType',
     'WorkspaceMember', 'MemberRole',
     'WorkspaceSubscription', 'SubscriptionStatus',
