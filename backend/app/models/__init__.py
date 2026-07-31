@@ -9,6 +9,7 @@ from .label import Label
 from .notification import Notification, NotificationType
 from .notification_preference import NotificationPreference
 from .patient import Patient, BloodType
+from .plan import Plan, PlanType
 from .project import Project, Visibility
 from .report import Report
 from .sprint import Sprint, SprintStatus
@@ -20,8 +21,9 @@ from .ticket_label import TicketLabel
 from .time_entry import TimeEntry, TimeEntryStatus
 from .user import User, UserRole, AuthProvider
 from .user_preference import UserPreference, Theme, DigestFrequency
-from .workspace import Workspace, PlanType
+from .workspace import Workspace, PlanType as WorkspacePlanType
 from .workspace_member import WorkspaceMember, MemberRole
+from .workspace_subscription import WorkspaceSubscription, SubscriptionStatus
 from .ai_usage_log import AIUsageLog
 from .workspace_ai_quota import WorkspaceAIQuota
 
@@ -36,6 +38,7 @@ __all__ = [
     'Notification', 'NotificationType',
     'NotificationPreference',
     'Patient', 'BloodType',
+    'Plan', 'PlanType',
     'Project', 'Visibility',
     'Report',
     'Sprint', 'SprintStatus',
@@ -47,8 +50,9 @@ __all__ = [
     'TimeEntry', 'TimeEntryStatus',
     'User', 'UserRole', 'AuthProvider',
     'UserPreference', 'Theme', 'DigestFrequency',
-    'Workspace', 'PlanType',
+    'Workspace', 'WorkspacePlanType',
     'WorkspaceMember', 'MemberRole',
+    'WorkspaceSubscription', 'SubscriptionStatus',
     'AIUsageLog',
     'WorkspaceAIQuota',
 ]
