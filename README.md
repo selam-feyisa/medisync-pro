@@ -4,7 +4,7 @@
 
 ## Features
 
-- **User Authentication & Authorization** - JWT-based auth with refresh tokens, role-based access control
+- **User Authentication & Authorization** - JWT-based auth with refresh tokens, role-based access control, OAuth (Google/GitHub)
 - **Workspace & Project Management** - Multi-tenant workspaces with projects and boards
 - **Kanban Boards** - Drag-and-drop ticket management with columns
 - **Scrum Sprints** - Sprint planning, tracking, and velocity metrics
@@ -18,6 +18,11 @@
 - **Reports Generation** - Export reports in PDF, CSV, and Excel formats
 - **Real-time Updates** - WebSocket support for live updates
 - **Notifications** - In-app notification system
+- **AI Assistant** - OpenAI integration for ticket summarization and PR descriptions
+- **Billing & Subscriptions** - Stripe integration for subscription management
+- **Admin Panel** - Audit logs, feature flags, and detailed health checks
+- **Public API v2** - OAuth client credentials grant with camelCase schemas
+- **Webhooks** - HMAC-signed webhook delivery with exponential backoff retry
 
 ## Tech Stack
 
@@ -26,10 +31,13 @@
 - **Database**: PostgreSQL with async SQLAlchemy
 - **Cache**: Redis for caching and session management
 - **Storage**: MinIO for file storage
-- **Authentication**: JWT with refresh tokens
+- **Authentication**: JWT with refresh tokens, OAuth (Google/GitHub)
 - **Real-time**: WebSocket support
 - **Testing**: Pytest with async support
 - **Container**: Docker Compose
+- **AI**: OpenAI API
+- **Payments**: Stripe
+- **Security**: Bleach for HTML sanitization, security headers middleware
 
 ## Project Structure
 
@@ -38,10 +46,12 @@ medisync-pro/
 ├── backend/                 # FastAPI backend
 │   ├── app/
 │   │   ├── api/            # API endpoints
+│   │   │   ├── v1/         # v1 API endpoints
+│   │   │   └── v2/         # v2 API endpoints (camelCase, OAuth)
 │   │   ├── core/           # Core utilities (database, security, etc.)
 │   │   ├── models/         # SQLAlchemy models
 │   │   ├── schemas/        # Pydantic schemas
-│   │   ├── services/       # Business logic
+│   │   ├── services/       # Business logic (AI, billing, webhooks)
 │   │   └── websocket/      # WebSocket handlers
 │   ├── tests/              # Integration tests
 │   └── requirements.txt
@@ -124,6 +134,49 @@ Once the backend is running, visit:
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
+## Environment Variables
+
+### Database & Cache
+- `DATABASE_URL`: PostgreSQL connection string (default: `sqlite+aiosqlite:///./medisync.db`)
+- `REDIS_URL`: Redis connection string (default: `redis://localhost:6379`)
+
+### Security
+- `SECRET_KEY`: FastAPI secret key (default: `development-secret-key`)
+- `ENCRYPTION_KEY`: Encryption key for sensitive data (default: `development-encryption-key`)
+- `ALGORITHM`: JWT algorithm (default: `HS256`)
+- `ACCESS_TOKEN_EXPIRE_MINUTES`: Access token expiration (default: `15`)
+- `REFRESH_TOKEN_EXPIRE_DAYS`: Refresh token expiration (default: `7`)
+
+### OAuth
+- `GOOGLE_CLIENT_ID`: Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
+- `GITHUB_CLIENT_ID`: GitHub OAuth client ID
+- `GITHUB_CLIENT_SECRET`: GitHub OAuth client secret
+
+### AI
+- `OPENAI_API_KEY`: OpenAI API key for AI features
+
+### Billing
+- `STRIPE_SECRET_KEY`: Stripe secret key for payments
+- `STRIPE_WEBHOOK_SECRET`: Stripe webhook secret for verification
+
+### Storage
+- `MINIO_URL`: MinIO endpoint (default: `localhost:9000`)
+- `MINIO_ACCESS_KEY`: MinIO access key (default: `minioadmin`)
+- `MINIO_SECRET_KEY`: MinIO secret key (default: `minioadmin`)
+- `MINIO_BUCKET_NAME`: MinIO bucket name (default: `medisync`)
+
+### Email (Optional)
+- `SMTP_HOST`: SMTP server host
+- `SMTP_PORT`: SMTP server port
+- `SMTP_USER`: SMTP username
+- `SMTP_PASSWORD`: SMTP password
+- `SMTP_TLS`: Use TLS (default: `False`)
+- `SMTP_FROM`: From email address
+
+### Frontend
+- `FRONTEND_URL`: Frontend URL for OAuth callbacks (default: `http://localhost:3000`)
+
 ## Roadmap Completion
 
 **All 25 days of the development roadmap have been completed:**
@@ -139,6 +192,16 @@ Once the backend is running, visit:
 - ✅ Days 23-24: Team Management, Permissions, Analytics, Reports
 - ✅ Day 25: Testing, Bug Fixes, Documentation
 
+**Additional Features Implemented:**
+- ✅ OAuth Authentication (Google/GitHub)
+- ✅ Healthcare Role Standardization
+- ✅ AI Assistant Module (OpenAI Integration)
+- ✅ Billing & Subscriptions (Stripe Integration)
+- ✅ Admin Panel (Audit Logs, Feature Flags, Health Checks)
+- ✅ Public API v2 (OAuth Client Credentials, camelCase schemas)
+- ✅ Webhooks (HMAC signing, exponential backoff retry)
+- ✅ Security Hardening (Security headers, HTML sanitization)
+
 ## Testing
 
 Integration tests are included for:
@@ -149,7 +212,12 @@ Integration tests are included for:
 Run tests with:
 ```bash
 cd backend
-pytest tests/ -v
+pytest tests/ -v -o asyncio_mode=auto
+```
+
+Run code coverage:
+```bash
+pytest --cov=app --cov-report=html
 ```
 
 ## Deployment
@@ -163,14 +231,14 @@ pytest tests/ -v
 5. Run database migrations
 6. Start services
 
-### Environment Variables
+### Security Considerations
 
-Key environment variables (see `.env.example`):
-- `DATABASE_URL`: PostgreSQL connection string
-- `REDIS_URL`: Redis connection string
-- `MINIO_ENDPOINT`: MinIO endpoint
-- `JWT_SECRET`: Secret for JWT token signing
-- `SECRET_KEY`: FastAPI secret key
+- All user-generated content is sanitized using Bleach
+- Security headers are applied via middleware
+- JWT tokens are used for authentication
+- OAuth 2.0 client credentials grant for API v2
+- HMAC SHA256 signing for webhooks
+- Role-based access control (RBAC) with healthcare roles
 
 ## Contributing
 

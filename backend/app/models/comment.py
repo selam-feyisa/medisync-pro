@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
+import bleach
 
 from app.models.base import Base, TimestampMixin
 
@@ -27,3 +28,12 @@ class Comment(Base, TimestampMixin):
 
     def __repr__(self):
         return f"<Comment {self.id} on ticket {self.ticket_id}>"
+    
+    def set_body(self, body: str):
+        """Set body with HTML sanitization."""
+        self.body = bleach.clean(
+            body,
+            tags=['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'code', 'pre'],
+            attributes={'a': ['href', 'title']},
+            strip=True
+        )

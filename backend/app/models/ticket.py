@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
 from enum import Enum
+import bleach
 
 from app.models.base import Base, TimestampMixin
 
@@ -54,6 +55,18 @@ class Ticket(Base, TimestampMixin):
     # blocked_dependencies = relationship("TicketDependency", back_populates="blocked")
     activities = relationship("TicketActivity", back_populates="ticket", cascade="all, delete-orphan")
 
+    def __repr__(self):
+        return f"<Ticket {self.id} - {self.title}>"
+    
+    def set_description(self, description: str):
+        """Set description with HTML sanitization."""
+        self.description = bleach.clean(
+            description,
+            tags=['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li', 'code', 'pre', 'h1', 'h2', 'h3'],
+            attributes={'a': ['href', 'title']},
+            strip=True
+        )
+
     # ==================== Full-Text Search Event Listener ====================
 from sqlalchemy import event
 import sqlalchemy as sa
@@ -65,10 +78,7 @@ def update_search_vector(mapper, connection, target):
     """Automatically update search_vector before save for full-text search"""
     search_text = f"{target.title or ''} {target.description or ''}".strip()
     if search_text:
-        if connection.dialect.name == 'sqlite':
-            target.search_vector = search_text
-        else:
-            target.search_vector = sa.func.to_tsvector('english', search_text)
+        target.search_vector = sa.func.to_tsvector('english', search_text)
 
 
 # ==================== Ticket Activity Auto-Logging ====================

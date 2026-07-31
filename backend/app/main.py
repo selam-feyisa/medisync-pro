@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.database import get_db, engine
 from app.models.base import Base
+from app.core.middleware import SecurityHeadersMiddleware
 
 # Routers
 from app.api.auth import router as auth_router
@@ -25,6 +26,12 @@ from app.api.ticket_label import router as ticket_label_router
 from app.api.search import router as search_router
 from app.api.time_entry import router as time_entry_router
 from app.api.file_attachment import router as file_attachment_router
+from app.api.ai import router as ai_router
+from app.api.billing import router as billing_router
+from app.api.admin import router as admin_router
+from app.api.v2.oauth import router as v2_oauth_router
+from app.api.v2.tickets import router as v2_tickets_router
+from app.api.v2.webhooks import router as v2_webhooks_router
 
 app = FastAPI(
     title="MediSync Pro",
@@ -41,6 +48,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Security Headers Middleware
+app.add_middleware(SecurityHeadersMiddleware)
 
 # ==================== API ROUTERS ====================
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
@@ -59,6 +69,16 @@ app.include_router(ticket_label_router, prefix="/api/v1", tags=["Ticket Labels"]
 app.include_router(search_router, prefix="/api/v1", tags=["Search"])
 app.include_router(time_entry_router, prefix="/api/v1", tags=["Time Tracking"])
 app.include_router(file_attachment_router, prefix="/api/v1", tags=["Attachments"])
+
+# New feature routers
+app.include_router(ai_router, prefix="/api/v1", tags=["AI"])
+app.include_router(billing_router, prefix="/api/v1", tags=["Billing"])
+app.include_router(admin_router, prefix="/api/v1", tags=["Admin"])
+
+# v2 API routers
+app.include_router(v2_oauth_router, prefix="/api/v2", tags=["OAuth v2"])
+app.include_router(v2_tickets_router, prefix="/api/v2", tags=["Tickets v2"])
+app.include_router(v2_webhooks_router, prefix="/api/v2", tags=["Webhooks v2"])
 
 
 @app.get("/health")
