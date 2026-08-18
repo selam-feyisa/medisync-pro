@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session_maker
+from app.core.database import AsyncSessionLocal as async_session_maker
 from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.models.workspace import Workspace
@@ -27,6 +27,7 @@ async def seed_data():
             hashed_password=hash_password("admin123"),
             role=UserRole.admin,
             timezone="UTC",
+            email_verified=True,
         )
         session.add(admin_user)
         await session.commit()
@@ -38,6 +39,7 @@ async def seed_data():
             hashed_password=hash_password("doctor123"),
             role=UserRole.doctor,
             timezone="America/New_York",
+            email_verified=True,
         )
         session.add(doctor_user)
         await session.commit()
