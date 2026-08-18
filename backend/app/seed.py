@@ -59,7 +59,7 @@ async def seed_data():
         admin_member = WorkspaceMember(
             workspace_id=workspace.id,
             user_id=admin_user.id,
-            role=MemberRole.owner,
+            role=MemberRole.admin,
         )
         session.add(admin_member)
 

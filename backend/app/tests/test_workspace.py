@@ -56,7 +56,7 @@ async def test_get_user_workspaces(db: AsyncSession):
     member = WorkspaceMember(
         workspace_id=workspace.id,
         user_id=user_id,
-        role=MemberRole.owner,
+        role=MemberRole.admin,
     )
     db.add(member)
     await db.flush()

@@ -21,7 +21,7 @@ async def test_check_workspace_access(db: AsyncSession):
     member = WorkspaceMember(
         workspace_id=workspace.id,
         user_id=user_id,
-        role=MemberRole.owner,
+        role=MemberRole.admin,
     )
     db.add(member)
     await db.flush()
@@ -45,7 +45,7 @@ async def test_check_workspace_permission(db: AsyncSession):
     member = WorkspaceMember(
         workspace_id=workspace.id,
         user_id=user_id,
-        role=MemberRole.owner,
+        role=MemberRole.admin,
     )
     db.add(member)
     await db.flush()

@@ -25,7 +25,7 @@ class WorkspaceService:
 
         # Add owner as workspace member
         owner_member = WorkspaceMember(
-            workspace_id=workspace.id, user_id=owner_id, role=MemberRole.owner
+            workspace_id=workspace.id, user_id=owner_id, role=MemberRole.admin
         )
         db.add(owner_member)
         return workspace

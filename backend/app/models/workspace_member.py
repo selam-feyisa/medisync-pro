@@ -12,6 +12,7 @@ class MemberRole(str, enum.Enum):
     nurse = "nurse"
     receptionist = "receptionist"
     patient = "patient"
+    member = "member"
 
 
 class WorkspaceMember(Base, TimestampMixin):

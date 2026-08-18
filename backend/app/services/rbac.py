@@ -5,6 +5,9 @@ from uuid import UUID
 from app.models import User, Workspace, WorkspaceMember, MemberRole
 
 
+from app.core.rbac import ROLE_HIERARCHY
+
+
 class RBACService:
     """Role-based access control service."""
 
@@ -13,6 +16,15 @@ class RBACService:
         db: AsyncSession, user_id: UUID, workspace_id: UUID
     ) -> bool:
         """Check if user has any access to workspace."""
+        # Workspace owner has access
+        workspace_stmt = select(Workspace).where(
+            (Workspace.id == workspace_id) & (Workspace.owner_id == user_id)
+        )
+        workspace_result = await db.execute(workspace_stmt)
+        if workspace_result.scalars().first() is not None:
+            return True
+
+        # Workspace members have access
         stmt = select(WorkspaceMember).where(
             (WorkspaceMember.user_id == user_id)
             & (WorkspaceMember.workspace_id == workspace_id)
@@ -28,6 +40,15 @@ class RBACService:
         required_role: MemberRole,
     ) -> bool:
         """Check if user has required role in workspace."""
+        # Owner has all permissions
+        workspace_stmt = select(Workspace).where(
+            (Workspace.id == workspace_id) & (Workspace.owner_id == user_id)
+        )
+        workspace_result = await db.execute(workspace_stmt)
+        if workspace_result.scalars().first() is not None:
+            return True
+
+        # Check workspace members
         stmt = select(WorkspaceMember).where(
             (WorkspaceMember.user_id == user_id)
             & (WorkspaceMember.workspace_id == workspace_id)
@@ -38,19 +59,10 @@ class RBACService:
         if not member:
             return False
 
-        # Owner has all permissions
-        if member.role == MemberRole.owner:
-            return True
+        user_level = ROLE_HIERARCHY.get(member.role, 0)
+        required_level = ROLE_HIERARCHY.get(required_role, 0)
 
-        # Map role hierarchy
-        role_hierarchy = {
-            MemberRole.owner: 4,
-            MemberRole.admin: 3,
-            MemberRole.member: 2,
-            MemberRole.viewer: 1,
-        }
-
-        return role_hierarchy[member.role] >= role_hierarchy[required_role]
+        return user_level >= required_level
 
     @staticmethod
     async def add_member_to_workspace(

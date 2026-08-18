@@ -15,6 +15,7 @@ ROLE_HIERARCHY = {
     MemberRole.nurse: 3,
     MemberRole.receptionist: 2,
     MemberRole.patient: 1,
+    MemberRole.member: 1,
 }
 
 
