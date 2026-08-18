@@ -10,7 +10,7 @@ from app.models.ai_usage_log import AIUsageLog
 from app.models.workspace_ai_quota import WorkspaceAIQuota
 from app.models.user import User
 from app.models.workspace import Workspace
-from app.core.cache import cache_result
+from app.core.cache import cache_response as cache_result
 import redis.asyncio as aioredis
 
 
