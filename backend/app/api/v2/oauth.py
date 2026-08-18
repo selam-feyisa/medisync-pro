@@ -5,9 +5,8 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.core.database import get_db
-from app.core.security import create_access_token
+from app.core.security import create_access_token, hash_password, verify_password
 from app.models.oauth_client import OAuthClient
-from app.core.crypto import hash_password, verify_password
 from pydantic import BaseModel
 from datetime import timedelta
 from app.core.config import settings
