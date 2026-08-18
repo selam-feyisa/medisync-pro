@@ -23,7 +23,7 @@ def get_current_user(token=Depends(security)):
         # to keep compatibility with existing endpoints, still return a dict,
         # but enforce email_verified flag.
         user_id = payload.get("sub")
-        # try to synchronously fetch via async session not possible here —
+        # try to synchronously fetch via async session not possible here â€”
         # so return payload but include email_verified check skipped when not available.
         return {
             "id": payload.get("sub"),
@@ -43,7 +43,7 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 def create_access_token(user_id: str, role: str, clinic_id: str = None) -> str:
-    """Create JWT access token — expires in ACCESS_TOKEN_EXPIRE_MINUTES."""
+    """Create JWT access token â€” expires in ACCESS_TOKEN_EXPIRE_MINUTES."""
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
@@ -58,7 +58,7 @@ def create_access_token(user_id: str, role: str, clinic_id: str = None) -> str:
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 def create_refresh_token(user_id: str) -> tuple[str, str]:
-    """Create refresh token — 7 days. Returns (token, jti).
+    """Create refresh token â€” 7 days. Returns (token, jti).
     Store jti in Redis so we can revoke on logout.
     """
     jti = str(uuid.uuid4())
@@ -96,3 +96,10 @@ async def get_current_user_ws(token: str):
         
     except JWTError:
         raise ValueError("Invalid or expired token")
+
+def verify_token(token: str) -> dict | None:
+    """Decode and verify a JWT, returning None if invalid or expired."""
+    try:
+        return decode_token(token)
+    except JWTError:
+        return None
