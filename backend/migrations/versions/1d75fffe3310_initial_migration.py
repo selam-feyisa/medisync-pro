@@ -79,7 +79,7 @@ def upgrade() -> None:
     sa.Column('mfa_secret', sa.String(length=64), nullable=True),
     sa.Column('auth_provider', sa.Enum('local', 'google', name='authprovider'), nullable=False),
     sa.Column('timezone', sa.String(length=50), nullable=False),
-    sa.Column('email_verified', sa.Boolean(), server_default=sa.text('0'), nullable=False),
+    sa.Column('email_verified', sa.Boolean(), server_default=sa.text('false'), nullable=False),
     sa.Column('reset_token', sa.String(length=255), nullable=True),
     sa.Column('reset_token_expires_at', sa.DateTime(), nullable=True),
     sa.Column('verification_sent_at', sa.DateTime(), nullable=True),
