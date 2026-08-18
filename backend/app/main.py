@@ -53,9 +53,9 @@ app.add_middleware(
 app.add_middleware(SecurityHeadersMiddleware)
 
 # ==================== API ROUTERS ====================
-app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(auth_router, prefix="/api/v1", tags=["Authentication"])
 app.include_router(profile_router, prefix="/api/v1", tags=["Profile"])
-app.include_router(workspace_router, prefix="/api/v1/workspaces", tags=["Workspaces"])
+app.include_router(workspace_router, prefix="/api/v1", tags=["Workspaces"])
 app.include_router(member_router, prefix="/api/v1", tags=["Members"])
 app.include_router(project_router, prefix="/api/v1", tags=["Projects"])
 app.include_router(board_router, prefix="/api/v1", tags=["Boards"])
@@ -67,7 +67,7 @@ app.include_router(label_router, prefix="/api/v1", tags=["Labels"])
 app.include_router(ticket_assignee_router, prefix="/api/v1", tags=["Ticket Assignees"])
 app.include_router(ticket_label_router, prefix="/api/v1", tags=["Ticket Labels"])
 app.include_router(search_router, prefix="/api/v1", tags=["Search"])
-app.include_router(time_entry_router, prefix="/api/v1", tags=["Time Tracking"])
+app.include_router(time_entry_router, tags=["Time Tracking"])
 app.include_router(file_attachment_router, prefix="/api/v1", tags=["Attachments"])
 
 # New feature routers
